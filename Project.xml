@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
-    <meta title="Pac Man Beta" package="com.Pac.Man" version="Packman" company="Pak" />
-    <app main="Main" file="pacMan" path="export" />
+    <meta title="Pac Man Beta" package="com.pac.Man" version="0.0.1" company="Pak" />
+    <app main="Main" file="pacman" path="export" />
     <window width="800" height="800" fps="60" background="#000000" />
     <source path="source" />
     <assets path="assets" rename="assets" />
