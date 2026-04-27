@@ -38,9 +38,7 @@ jobs:
 
       - name: Configure Lime Android
         run: |
-          yes | haxelib run lime setup android
-          haxelib run lime config ANDROID_SDK $ANDROID_SDK_ROOT
-          haxelib run lime config JAVA_HOME $JAVA_HOME
+          haxelib run lime setup android
 
       - name: Build Android APK
         run: |
