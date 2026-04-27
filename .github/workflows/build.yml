@@ -1,4 +1,4 @@
-name: Build Haxe Project
+name: Android Build
 
 on:
   push:
@@ -6,32 +6,47 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Setup Haxe
         uses: krdlab/setup-haxe@v1
         with:
           haxe-version: 4.2.5
 
-      - name: Install Libraries
+      - name: Install Haxelib Dependencies
         run: |
+          haxelib install lime
           haxelib install openfl
           haxelib install flixel
-          haxelib install lime
-          haxelib install flixel-tools
 
-      - name: Run Lime Setup
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android Build Tools
+        run: |
+          sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+
+      - name: Configure Lime
         run: |
           haxelib run lime setup
+          haxelib run lime config ANDROID_SDK $ANDROID_SDK_ROOT
 
-      - name: Build Project
-        run: haxelib run lime build windows
+      - name: Build APK
+        run: |
+          haxelib run lime build android
 
-      - name: Upload Public Artifact
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Template-Build
-          path: export/
+          name: AndroidBuild
+          path: export/android/bin/app/build/outputs/apk/debug/*.apk
