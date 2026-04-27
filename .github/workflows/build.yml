@@ -1,0 +1,37 @@
+name: Build Haxe Project
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Haxe
+        uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: latest
+
+      - name: Install Libraries
+        run: |
+          haxelib install openfl
+          haxelib install flixel
+          haxelib install lime
+          haxelib install flixel-tools
+       
+       - name: run lime setup
+         run: |
+          haxelib run lime setup
+
+      - name: Build Project
+        run: haxelib run lime build windows
+        
+        - name: Upload Public Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Template-Build
+          path: export/
