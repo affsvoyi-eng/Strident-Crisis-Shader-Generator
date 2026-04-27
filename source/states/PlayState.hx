@@ -4,9 +4,11 @@ import flixel.FlxState;
 import flixel.FlxSprite;
 import flixel.FlxG;
 import flixel.text.FlxText;
-import flixel.addons.ui.FlxUIButton;
-import flixel.addons.ui.FlxUISlider;
-import openfl.display.Shader;
+import flixel.ui.FlxButton;
+import flixel.ui.FlxBar;
+import flixel.util.FlxColor;
+import flixel.system.FlxAssets.FlxShader;
+
 import openfl.net.FileReference;
 import openfl.events.Event;
 import openfl.net.FileFilter;
@@ -25,12 +27,16 @@ class PlayState extends FlxState
     var speedText:FlxText;
     var timeText:FlxText;
 
+    var waveAmplitude:Float = 0.1;
+    var frequency:Float = 5.0;
+    var speed:Float = 2.0;
+
     override public function create():Void
     {
         super.create();
 
         // =========================
-        // Background padrão
+        // Fundo padrão
         // =========================
         bg = new FlxSprite();
         bg.loadGraphic("assets/images/bg/cheeseburger.png");
@@ -43,53 +49,77 @@ class PlayState extends FlxState
         shader = new CustomWaveShader();
 
         shader.uTime.value = [0.0];
-        shader.uSpeed.value = [1.0];
-        shader.uFrequency.value = [5.0];
-        shader.uWaveAmplitude.value = [0.1];
-        shader.effectType.value = [0]; // FLAG
+        shader.uSpeed.value = [speed];
+        shader.uFrequency.value = [frequency];
+        shader.uWaveAmplitude.value = [waveAmplitude];
+        shader.effectType.value = [0];
 
         bg.shader = shader;
 
         // =========================
         // Botão carregar imagem
         // =========================
-        var loadButton = new FlxUIButton(20, 20, "Add Image", loadImage);
-        add(loadButton);
+        var loadBtn = new FlxButton(20, 20, "Add image", loadImage);
+        add(loadBtn);
 
         // =========================
         // Wave Amplitude
         // =========================
-        ampText = new FlxText(20, 70, 300, "Wave Amplitude: 0.02");
+        ampText = new FlxText(20, 70, 400, "Wave Amplitude: " + waveAmplitude);
         add(ampText);
 
-        var ampSlider = new FlxUISlider(this, "setAmplitude", 20, 90, 0.0, 0.2, 250, 20);
-        ampSlider.value = 0.02;
-        add(ampSlider);
+        add(new FlxButton(20, 95, "-", function()
+        {
+            waveAmplitude = Math.max(0, waveAmplitude - 0.005);
+            updateShaderValues();
+        }));
+
+        add(new FlxButton(60, 95, "+", function()
+        {
+            waveAmplitude += 0.005;
+            updateShaderValues();
+        }));
 
         // =========================
         // Frequency
         // =========================
-        freqText = new FlxText(20, 130, 300, "Frequency: 5");
+        freqText = new FlxText(20, 140, 400, "Frequency: " + frequency);
         add(freqText);
 
-        var freqSlider = new FlxUISlider(this, "setFrequency", 20, 150, 1.0, 50.0, 250, 20);
-        freqSlider.value = 10;
-        add(freqSlider);
+        add(new FlxButton(20, 165, "-", function()
+        {
+            frequency = Math.max(1, frequency - 1);
+            updateShaderValues();
+        }));
+
+        add(new FlxButton(60, 165, "+", function()
+        {
+            frequency += 1;
+            updateShaderValues();
+        }));
 
         // =========================
         // Speed
         // =========================
-        speedText = new FlxText(20, 190, 300, "Speed: 2");
+        speedText = new FlxText(20, 210, 400, "Speed: " + speed);
         add(speedText);
 
-        var speedSlider = new FlxUISlider(this, "setSpeed", 20, 210, 0.1, 10.0, 250, 20);
-        speedSlider.value = 2;
-        add(speedSlider);
+        add(new FlxButton(20, 235, "-", function()
+        {
+            speed = Math.max(0.1, speed - 0.1);
+            updateShaderValues();
+        }));
+
+        add(new FlxButton(60, 235, "+", function()
+        {
+            speed += 0.1;
+            updateShaderValues();
+        }));
 
         // =========================
-        // uTime display
+        // uTime
         // =========================
-        timeText = new FlxText(20, 250, 300, "uTime: 0");
+        timeText = new FlxText(20, 280, 400, "uTime: 0");
         add(timeText);
     }
 
@@ -97,38 +127,23 @@ class PlayState extends FlxState
     {
         super.update(elapsed);
 
-        // =========================
-        // Atualização contínua do shader
-        // =========================
         shader.uTime.value[0] += elapsed;
 
-        // Evita overflow
         if (shader.uTime.value[0] > 999999)
             shader.uTime.value[0] = 0;
 
-        // Atualiza texto visual
         timeText.text = "uTime: " + Std.string(Std.int(shader.uTime.value[0] * 100) / 100);
     }
 
-    // =========================
-    // Slider Functions
-    // =========================
-    public function setAmplitude(value:Float):Void
+    function updateShaderValues():Void
     {
-        shader.uWaveAmplitude.value = [value];
-        ampText.text = "Wave Amplitude: " + Std.string(value);
-    }
+        shader.uWaveAmplitude.value = [waveAmplitude];
+        shader.uFrequency.value = [frequency];
+        shader.uSpeed.value = [speed];
 
-    public function setFrequency(value:Float):Void
-    {
-        shader.uFrequency.value = [value];
-        freqText.text = "Frequency: " + Std.string(value);
-    }
-
-    public function setSpeed(value:Float):Void
-    {
-        shader.uSpeed.value = [value];
-        speedText.text = "Speed: " + Std.string(value);
+        ampText.text = "Wave Amplitude: " + waveAmplitude;
+        freqText.text = "Frequency: " + frequency;
+        speedText.text = "Speed: " + speed;
     }
 
     // =========================
@@ -168,9 +183,9 @@ class PlayState extends FlxState
 }
 
 // =========================
-// Shader Class
+// Shader
 // =========================
-class CustomWaveShader extends Shader
+class CustomWaveShader extends FlxShader
 {
     @:glFragmentSource('
         #pragma header
@@ -224,9 +239,10 @@ class CustomWaveShader extends Shader
         void main()
         {
             vec2 uv = sineWave(openfl_TextureCoordv);
-            gl_FragColor = texture2D(bitmap, uv);
+            gl_FragColor = flixel_texture2D(bitmap, uv);
         }
     ')
+
     public function new()
     {
         super();
