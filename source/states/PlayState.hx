@@ -138,6 +138,11 @@ class PlayState extends FlxState
         timeText = new FlxText(20, 280, 400, "uTime: 0");
         add(timeText);
         uiElements.push(timeText);
+
+        var toggleText:FlxText = new FlxText(20, FlxG.height - 30, 400, "Press SPACE to hide/show UI");
+        toggleText.setFormat(null, 16, 0xFFFFFFFF, LEFT);
+        add(toggleText);
+        uiElements.push(toggleText);
     }
 
     override public function update(elapsed:Float):Void
