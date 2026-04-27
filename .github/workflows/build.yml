@@ -9,30 +9,31 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Setup Haxe
         uses: krdlab/setup-haxe@v1
         with:
-          haxe-version: latest
+          haxe-version: 4.2.5
 
       - name: Install Libraries
         run: |
+          haxelib install lime
           haxelib install openfl
           haxelib install flixel
-          haxelib install lime
           haxelib install flixel-tools
-       
-       - name: run lime setup
-         run: |
+
+      - name: Run Lime Setup
+        run: |
           haxelib run lime setup
 
       - name: Build Project
-        run: haxelib run lime build windows
-        
-        - name: Upload Public Artifact
+        run: |
+          haxelib run lime build windows
+
+      - name: Upload Public Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Pac-Man
           path: export/
-          
