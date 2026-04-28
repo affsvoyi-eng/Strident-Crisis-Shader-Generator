@@ -131,9 +131,9 @@ jobs:
           haxelib run lime config JAVA_HOME $JAVA_HOME
           haxelib run lime config ANDROID_SETUP true
 
-      - name: Rebuild HXCPP
+      - name: Setup HXCPP
         run: |
-          haxelib run hxcpp rebuild
+          haxelib run lime rebuild hxcpp linux
 
       - name: Build Android APK
         env:
