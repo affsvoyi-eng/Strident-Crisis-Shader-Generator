@@ -13,7 +13,7 @@ import openfl.display.Loader;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
 import openfl.net.URLRequest;
-import openfl.net.navigateToURL;
+import openfl.Lib;
 
 import haxe.Http;
 
