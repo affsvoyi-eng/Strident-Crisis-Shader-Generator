@@ -110,7 +110,7 @@ jobs:
           name: Strident-Crisis-Shader-generator-html5
           path: export/html5/bin/
 
-          neko:
+  neko:
     runs-on: ubuntu-latest
 
     steps:
@@ -143,7 +143,7 @@ jobs:
           name: Strident-Crisis-Shader-generator-neko
           path: export/neko/bin/
 
-          mac:
+  mac:
     runs-on: macos-latest
 
     steps:
