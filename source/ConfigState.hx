@@ -4,8 +4,10 @@ import flixel.FlxState;
 import flixel.FlxG;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
+#if sys
 import sys.io.File;
 import sys.FileSystem;
+#end
 
 class ConfigState extends FlxState
 {
