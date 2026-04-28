@@ -13,7 +13,6 @@ class ConfigState extends FlxState
     var frequency:Float = 5.0;
     var speed:Float = 2.0;
     var effectType:Int = 0;
-    var shader:String = "customwave";
     var uiVisible:Bool = true;
 
     var ampText:FlxText;
@@ -112,7 +111,6 @@ class ConfigState extends FlxState
     function saveSettings():Void
     {
         var content =
-            "shader=" + shader + "\n" +
             "waveAmplitude=" + waveAmplitude + "\n" +
             "frequency=" + frequency + "\n" +
             "speed=" + speed + "\n" +
