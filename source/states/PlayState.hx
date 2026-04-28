@@ -77,7 +77,7 @@ class PlayState extends FlxState
         add(ampMinus);
         uiElements.push(ampMinus);
 
-        var ampPlus = new FlxButton(60, 95, "+", function()
+        var ampPlus = new FlxButton(80, 95, "+", function()
         {
             waveAmplitude += 0.005;
             updateShaderValues();
@@ -97,7 +97,7 @@ class PlayState extends FlxState
         add(freqMinus);
         uiElements.push(freqMinus);
 
-        var freqPlus = new FlxButton(60, 165, "+", function()
+        var freqPlus = new FlxButton(80, 165, "+", function()
         {
             frequency += 1;
             updateShaderValues();
@@ -117,7 +117,7 @@ class PlayState extends FlxState
         add(speedMinus);
         uiElements.push(speedMinus);
 
-        var speedPlus = new FlxButton(60, 235, "+", function()
+        var speedPlus = new FlxButton(80, 235, "+", function()
         {
             speed += 0.1;
             updateShaderValues();
