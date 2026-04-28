@@ -53,7 +53,7 @@ class PlayState extends FlxState
 
     var defaultImage:String = "assets/images/bg/cheeseburger.png";
 
-    var currentVersion:String = "0.0.3";
+    var currentVersion:String = "0.0.4";
     var latestVersion:String = "";
     var updateAvailable:Bool = false;
 
