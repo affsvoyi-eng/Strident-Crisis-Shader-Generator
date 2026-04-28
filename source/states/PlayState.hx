@@ -53,7 +53,7 @@ class PlayState extends FlxState
 
     var defaultImage:String = "assets/images/bg/cheeseburger.png";
 
-    var currentVersion:String = "0.0.4";
+    var currentVersion:String = "0.0.5";
     var latestVersion:String = "";
     var updateAvailable:Bool = false;
 
@@ -225,24 +225,11 @@ class PlayState extends FlxState
             if (FlxG.keys.justPressed.ENTER)
             {
                 playClick();
-
-                Lib.getURL(
-                    new URLRequest(
-                        "https://github.com/affsvoyo/Strident-Crisis-Shader-Generator/releases/latest"
-                    ),
-                    "_blank"
-                );
-
-                updatePrompt.visible = false;
-                updateAvailable = false;
             }
 
             if (FlxG.keys.justPressed.ESCAPE)
             {
                 playClick();
-
-                updatePrompt.visible = false;
-                updateAvailable = false;
             }
         }
     }
