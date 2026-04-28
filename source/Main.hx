@@ -4,8 +4,10 @@ import openfl.display.Sprite;
 import flixel.FlxGame;
 import states.PlayState;
 import states.ConfigState;
-import sys.FileSystem;
+#if sys
 import sys.io.File;
+import sys.FileSystem;
+#end
 
 class Main extends Sprite
 {
