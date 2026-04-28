@@ -172,8 +172,14 @@ class PlayState extends FlxState
     {
         var path = "assets/data/settings.txt";
 
-        if (!FileSystem.exists(path))
-            return;
+        #if sys
+if (!sys.FileSystem.exists(path))
+    return;
+
+var lines:Array<String> = sys.io.File.getContent(path).split("\n");
+#else
+return;
+#end
 
         var lines = File.getContent(path).split("\n");
 
