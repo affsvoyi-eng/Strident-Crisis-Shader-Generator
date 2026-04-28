@@ -3,7 +3,7 @@ package;
 import openfl.display.Sprite;
 import flixel.FlxGame;
 import states.PlayState;
-import states.ConfigState;
+import ConfigState;
 #if sys
 import sys.io.File;
 import sys.FileSystem;
