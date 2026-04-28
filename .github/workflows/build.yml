@@ -76,40 +76,7 @@ jobs:
         with:
           name: Strident-Crisis-Shader-generator-linux
           path: export/linux/bin/
-
-  html5:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Haxe
-        uses: krdlab/setup-haxe@v1
-        with:
-          haxe-version: 4.2.5
-
-      - name: Install Libraries
-        run: |
-          haxelib install lime --quiet
-          haxelib install openfl --quiet
-          haxelib install flixel --quiet
-          haxelib install flixel-tools --quiet
-
-      - name: Run Lime Setup
-        run: |
-          haxelib run lime setup
-
-      - name: Build HTML5
-        run: |
-          haxelib run lime build html5
-
-      - name: Upload HTML5 Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Strident-Crisis-Shader-generator-html5
-          path: export/html5/bin/
-
+          
   neko:
     runs-on: ubuntu-latest
 
