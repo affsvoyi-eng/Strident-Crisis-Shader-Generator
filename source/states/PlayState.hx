@@ -5,15 +5,20 @@ import flixel.FlxSprite;
 import flixel.FlxG;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
 
 import openfl.net.FileReference;
 import openfl.events.Event;
 import openfl.net.FileFilter;
 import openfl.display.Loader;
 import openfl.display.Bitmap;
-import openfl.display.BitmapData;
 import openfl.net.URLRequest;
 import openfl.Lib;
+import openfl.media.Sound;
+
+import lime.app.Application;
+import lime.ui.Window;
 
 import haxe.Http;
 
@@ -37,6 +42,8 @@ class PlayState extends FlxState
     var versionText:FlxText;
     var updatePrompt:FlxText;
 
+    var clickSound:Sound;
+
     var waveAmplitude:Float = 0.1;
     var frequency:Float = 5.0;
     var speed:Float = 2.0;
@@ -55,6 +62,8 @@ class PlayState extends FlxState
         super.create();
 
         loadSettings();
+
+        clickSound = Sound.fromFile("assets/sounds/click.ogg");
 
         bg = new FlxSprite();
         bg.loadGraphic(defaultImage);
@@ -86,9 +95,21 @@ class PlayState extends FlxState
         updatePrompt.visible = false;
         add(updatePrompt);
 
-        var loadBtn = new FlxButton(20, 20, "Add Image", loadImage);
+        var loadBtn = new FlxButton(20, 20, "Add Image", function()
+        {
+            playClick();
+            loadImage();
+        });
         add(loadBtn);
         uiElements.push(loadBtn);
+
+        var exitBtn = new FlxButton(FlxG.width - 100, 20, "Exit", function()
+        {
+            playClick();
+            closeGame();
+        });
+        add(exitBtn);
+        uiElements.push(exitBtn);
 
         ampText = new FlxText(20, 70, 400, "Wave Amplitude: " + waveAmplitude);
         add(ampText);
@@ -96,6 +117,7 @@ class PlayState extends FlxState
 
         var ampMinus = new FlxButton(20, 95, "-", function()
         {
+            playClick();
             waveAmplitude = Math.max(0, waveAmplitude - 0.005);
             updateShaderValues();
         });
@@ -104,6 +126,7 @@ class PlayState extends FlxState
 
         var ampPlus = new FlxButton(120, 95, "+", function()
         {
+            playClick();
             waveAmplitude += 0.005;
             updateShaderValues();
         });
@@ -116,6 +139,7 @@ class PlayState extends FlxState
 
         var freqMinus = new FlxButton(20, 165, "-", function()
         {
+            playClick();
             frequency = Math.max(1, frequency - 1);
             updateShaderValues();
         });
@@ -124,6 +148,7 @@ class PlayState extends FlxState
 
         var freqPlus = new FlxButton(120, 165, "+", function()
         {
+            playClick();
             frequency += 1;
             updateShaderValues();
         });
@@ -136,6 +161,7 @@ class PlayState extends FlxState
 
         var speedMinus = new FlxButton(20, 235, "-", function()
         {
+            playClick();
             speed = Math.max(0.1, speed - 0.1);
             updateShaderValues();
         });
@@ -144,6 +170,7 @@ class PlayState extends FlxState
 
         var speedPlus = new FlxButton(120, 235, "+", function()
         {
+            playClick();
             speed += 0.1;
             updateShaderValues();
         });
@@ -178,8 +205,15 @@ class PlayState extends FlxState
             Std.int(shader.uTime.value[0] * 100) / 100
         );
 
+        if (FlxG.mouse.justPressed)
+        {
+            playClick();
+        }
+
         if (FlxG.keys.justPressed.SPACE)
         {
+            playClick();
+
             uiVisible = !uiVisible;
 
             for (element in uiElements)
@@ -193,12 +227,14 @@ class PlayState extends FlxState
         {
             if (FlxG.keys.justPressed.ENTER)
             {
+                playClick();
+
                 Lib.getURL(
-    new URLRequest(
-        "https://github.com/affsvoyo/Strident-Crisis-Shader-Generator/releases/latest"
-    ),
-    "_blank"
-);
+                    new URLRequest(
+                        "https://github.com/affsvoyo/Strident-Crisis-Shader-Generator/releases/latest"
+                    ),
+                    "_blank"
+                );
 
                 updatePrompt.visible = false;
                 updateAvailable = false;
@@ -206,10 +242,41 @@ class PlayState extends FlxState
 
             if (FlxG.keys.justPressed.ESCAPE)
             {
+                playClick();
+
                 updatePrompt.visible = false;
                 updateAvailable = false;
             }
         }
+    }
+
+    function playClick():Void
+    {
+        if (clickSound != null)
+        {
+            clickSound.play();
+        }
+    }
+
+    function closeGame():Void
+    {
+        var window:Window = Application.current.window;
+
+        FlxTween.num(
+            1,
+            0.1,
+            0.4,
+            {ease: FlxEase.quadIn},
+            function(scale:Float)
+            {
+                window.width = Std.int(1280 * scale);
+                window.height = Std.int(720 * scale);
+            },
+            function(_)
+            {
+                Sys.exit(0);
+            }
+        );
     }
 
     function checkForUpdates():Void
