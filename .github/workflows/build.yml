@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  windows:
     runs-on: windows-latest
 
     steps:
@@ -18,28 +18,30 @@ jobs:
           haxe-version: 4.2.5
 
       - name: Install Libraries
+        shell: bash
         run: |
-          haxelib install lime
-          haxelib install openfl
-          haxelib install flixel
-          haxelib install flixel-tools
+          haxelib install lime --quiet
+          haxelib install openfl --quiet
+          haxelib install flixel --quiet
+          haxelib install flixel-tools --quiet
 
       - name: Run Lime Setup
+        shell: bash
         run: |
           haxelib run lime setup
 
       - name: Build Project
+        shell: bash
         run: |
           haxelib run lime build windows
 
       - name: Bruh Nothing
-        run: |
-          echo "bruh"
+        run: echo "bruh"
 
-      - name: Upload Public Artifact
+      - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Strident-Crisis-Shader-generator
+          name: Strident-Crisis-Shader-generator-windows
           path: export/windows/bin/
 
   linux:
@@ -56,10 +58,10 @@ jobs:
 
       - name: Install Libraries
         run: |
-          haxelib install lime
-          haxelib install openfl
-          haxelib install flixel
-          haxelib install flixel-tools
+          haxelib install lime --quiet
+          haxelib install openfl --quiet
+          haxelib install flixel --quiet
+          haxelib install flixel-tools --quiet
 
       - name: Run Lime Setup
         run: |
@@ -69,42 +71,53 @@ jobs:
         run: |
           haxelib run lime build linux
 
-      - name: Upload Public Artifact
+      - name: Upload Linux Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Strident-Crisis-Shader-generator
+          name: Strident-Crisis-Shader-generator-linux
           path: export/linux/bin/
 
-          Android:
+  android:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@main
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Setup Haxe
-        uses: krdlab/setup-haxe@master
+        uses: krdlab/setup-haxe@v1
         with:
           haxe-version: 4.2.5
 
       - name: Install Libraries
         run: |
-          haxelib install lime
-          haxelib install openfl
-          haxelib install flixel
-          haxelib install flixel-tools
+          haxelib install lime --quiet
+          haxelib install openfl --quiet
+          haxelib install flixel --quiet
+          haxelib install flixel-tools --quiet
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
       - name: Configure Android
         run: |
-          haxelib run lime config ANDROID_SDK $ANDROID_HOME
-          haxelib run lime config ANDROID_NDK_ROOT $ANDROID_NDK_LATEST_HOME
-          haxelib run lime config JAVA_HOME $JAVA_HOME_17_X64
-          haxelib run lime config ANDROID_SETUP true 
+          haxelib run lime config ANDROID_SDK $ANDROID_SDK_ROOT
+          haxelib run lime config ANDROID_NDK_ROOT $ANDROID_NDK_ROOT
+          haxelib run lime config JAVA_HOME $JAVA_HOME
+          haxelib run lime config ANDROID_SETUP true
 
-      - name: Compile
-        run: haxelib run lime build android
+      - name: Build Android APK
+        run: |
+          haxelib run lime build android
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@main
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: androidBuild
+          name: Strident-Crisis-Shader-generator-android
           path: export/android/bin/app/build/outputs/apk/debug/*.apk
