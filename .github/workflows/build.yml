@@ -30,7 +30,7 @@ jobs:
         run: |
           haxelib run lime setup
 
-      - name: Build Project
+      - name: Build Windows
         shell: bash
         run: |
           haxelib run lime build windows
@@ -67,7 +67,7 @@ jobs:
         run: |
           haxelib run lime setup
 
-      - name: Build Project
+      - name: Build Linux
         run: |
           haxelib run lime build linux
 
@@ -76,7 +76,8 @@ jobs:
         with:
           name: Strident-Crisis-Shader-generator-linux
           path: export/linux/bin/
-html5:
+
+  html5:
     runs-on: ubuntu-latest
 
     steps:
