@@ -8,10 +8,6 @@ jobs:
   android:
     runs-on: ubuntu-latest
 
-    env:
-      ANDROID_SDK: /usr/local/lib/android/sdk
-      ANDROID_NDK_ROOT: /usr/local/lib/android/sdk/ndk-bundle
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -30,21 +26,13 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Accept Android Licenses
-        run: yes | sdkmanager --licenses
-
-      - name: Install Android SDK + NDK
+      - name: Install Android SDK + Correct NDK
         run: |
+          yes | sdkmanager --licenses
           sdkmanager "platform-tools" \
                      "platforms;android-33" \
                      "build-tools;33.0.2" \
-                     "ndk-bundle"
-
-      - name: Export Android Paths
-        run: |
-          echo "ANDROID_HOME=$ANDROID_SDK" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK" >> $GITHUB_ENV
-          echo "ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT" >> $GITHUB_ENV
+                     "ndk;23.2.8568313"
 
       - name: Install Libraries
         run: |
@@ -56,13 +44,15 @@ jobs:
           haxelib install flixel-addons --quiet
           haxelib install hxcpp --quiet
 
-      - name: Run Lime Android Setup
-        run: |
-          haxelib run lime setup android
-
       - name: Build Android
         run: |
-          haxelib run lime build android
+          export ANDROID_SDK=/usr/local/lib/android/sdk
+          export ANDROID_HOME=/usr/local/lib/android/sdk
+          export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
+          export ANDROID_NDK_ROOT=/usr/local/lib/android/sdk/ndk/23.2.8568313
+          export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+          haxelib run lime setup android
+          haxelib run lime build android -release
 
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
