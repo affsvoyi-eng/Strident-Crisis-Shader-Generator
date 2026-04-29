@@ -23,7 +23,11 @@ import lime.ui.Window;
 import haxe.Http;
 
 import states.CustomWaveShader;
-
+#if mobile
+import openfl.permissions.Permissions;
+import openfl.permissions.Permission;
+#end
+    
 #if sys
 import sys.io.File;
 import sys.FileSystem;
@@ -319,11 +323,24 @@ class PlayState extends FlxState
     }
 
     function loadImage():Void
+{
+    #if mobile
+    Permissions.requestPermission(Permission.READ_EXTERNAL_STORAGE, function(granted:Bool)
     {
-        fileRef = new FileReference();
-        fileRef.addEventListener(Event.SELECT, onFileSelected);
-        fileRef.browse([new FileFilter("Images", "*.png;*.jpg;*.jpeg")]);
-    }
+        if (granted)
+        {
+            fileRef = new FileReference();
+            fileRef.addEventListener(Event.SELECT, onFileSelected);
+            fileRef.browse([new FileFilter("Images", "*.png;*.jpg;*.jpeg")]);
+        }
+    });
+    #else
+    fileRef = new FileReference();
+    fileRef.addEventListener(Event.SELECT, onFileSelected);
+    fileRef.browse([new FileFilter("Images", "*.png;*.jpg;*.jpeg")]);
+    #end
+}
+
 
     function onFileSelected(e:Event):Void
     {
