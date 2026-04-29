@@ -82,8 +82,6 @@ class PlayState extends FlxState
         brightnessOverlay.scrollFactor.set();
         add(brightnessOverlay);
 
-        checkForUpdates();
-
         versionText = new FlxText(10, FlxG.height - 50, 500, "Version: " + currentVersion);
         add(versionText);
         uiElements.push(versionText);
