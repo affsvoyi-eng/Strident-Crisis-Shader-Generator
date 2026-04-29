@@ -1,0 +1,60 @@
+name: Build Android
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Haxe
+        uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.2.5
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android Licenses
+        run: yes | sdkmanager --licenses
+
+      - name: Install Android Packages
+        run: |
+          sdkmanager "platform-tools" \
+                     "platforms;android-33" \
+                     "build-tools;33.0.2"
+
+      - name: Install Libraries
+        run: |
+          haxelib setup ~/haxelib
+          haxelib install lime --quiet
+          haxelib install openfl --quiet
+          haxelib install flixel --quiet
+          haxelib install flixel-tools --quiet
+          haxelib install flixel-addons --quiet
+          haxelib install hxcpp --quiet
+
+      - name: Run Lime Android Setup
+        run: |
+          haxelib run lime setup android
+
+      - name: Build Android
+        run: |
+          haxelib run lime build android
+
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Strident-Crisis-Shader-generator-android
+          path: export/android/bin/app/build/outputs/apk/
