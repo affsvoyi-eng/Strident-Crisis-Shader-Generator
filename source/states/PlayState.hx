@@ -323,25 +323,9 @@ class PlayState extends FlxState
 
     function loadImage():Void
 {
-    #if android
-    Permissions.requestPermissions(["android.permission.READ_EXTERNAL_STORAGE"], function(granted:Bool)
-    {
-        if (granted)
-        {
-            fileRef = new FileReference();
-            fileRef.addEventListener(Event.SELECT, onFileSelected);
-            fileRef.browse([new FileFilter("Images", "*.png;*.jpg;*.jpeg")]);
-        }
-    });
-    #elseif mobile
     fileRef = new FileReference();
     fileRef.addEventListener(Event.SELECT, onFileSelected);
     fileRef.browse([new FileFilter("Images", "*.png;*.jpg;*.jpeg")]);
-    #else
-    fileRef = new FileReference();
-    fileRef.addEventListener(Event.SELECT, onFileSelected);
-    fileRef.browse([new FileFilter("Images", "*.png;*.jpg;*.jpeg")]);
-    #end
 }
     function onFileSelected(e:Event):Void
     {
