@@ -5,17 +5,17 @@ on:
   pull_request:
 
 jobs:
-  android:
+  Android:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Haxe
         uses: krdlab/setup-haxe@v1
         with:
-          haxe-version: 4.3.4
+          haxe-version: 4.2.5
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -32,15 +32,12 @@ jobs:
           sdkmanager --update
           sdkmanager \
             "platform-tools" \
-            "platforms;android-34" \
-            "build-tools;34.0.0" \
-            "cmdline-tools;latest" \
-            "ndk;25.2.9519653" \
-            "cmake;3.22.1" \
-            "extras;android;m2repository" \
-            "extras;google;m2repository"
+            "platforms;android-30" \
+            "build-tools;30.0.3" \
+            "ndk;21.4.7075529" \
+            "cmake;3.18.1"
 
-      - name: Install Haxelib Libraries
+      - name: Install Libraries
         run: |
           haxelib setup ~/haxelib
           haxelib install lime --quiet
@@ -50,18 +47,20 @@ jobs:
           haxelib install flixel-addons --quiet
           haxelib install hxcpp --quiet
 
-      - name: Build Android
+      - name: Configure Android
         run: |
-          export ANDROID_SDK=/usr/local/lib/android/sdk
-          export ANDROID_HOME=/usr/local/lib/android/sdk
-          export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
-          export ANDROID_NDK_ROOT=/usr/local/lib/android/sdk/ndk/25.2.9519653
-          export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
-          haxelib run lime setup android
-          haxelib run lime build android -debug
+          haxelib run lime config ANDROID_SDK $ANDROID_SDK_ROOT
+          haxelib run lime config ANDROID_NDK_ROOT /usr/local/lib/android/sdk/ndk/21.4.7075529
+          haxelib run lime config JAVA_HOME $JAVA_HOME
+          haxelib run lime config ANDROID_SETUP true
 
-      - name: Upload Android Artifact
+      - name: Compile
+        run: |
+          haxelib run lime build android -release
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Strident-Crisis-Shader-generator-android
+          name: androidBuild
           path: export/android/bin/app/build/outputs/apk/
+          if-no-files-found: error
