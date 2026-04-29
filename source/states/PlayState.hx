@@ -54,7 +54,7 @@ class PlayState extends FlxState
 
     var defaultImage:String = "assets/images/bg/cheeseburger.png";
 
-    var currentVersion:String = "0.0.5";
+    var currentVersion:String = "0.0.6";
     var latestVersion:String = "";
     var updateAvailable:Bool = false;
 
@@ -82,7 +82,7 @@ class PlayState extends FlxState
         brightnessOverlay.scrollFactor.set();
         add(brightnessOverlay);
 
-        versionText = new FlxText(10, FlxG.height - 50, 500, "Version: " + currentVersion);
+        versionText = new FlxText(10, 20, 500, "Version: " + currentVersion);
         add(versionText);
         uiElements.push(versionText);
 
@@ -192,9 +192,11 @@ class PlayState extends FlxState
 
         timeText = new FlxText(20, 330, 400, "Time: 0");
         add(timeText);
+        uiElements.push(timeText);
 
         var toggleText = new FlxText(20, FlxG.height - 30, 500, "Press SPACE to toggle UI");
         add(toggleText);
+        uiElements.push(toggleText);
 
         updateBrightness();
     }
