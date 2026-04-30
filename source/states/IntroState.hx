@@ -2,33 +2,34 @@ package states;
 
 import flixel.FlxState;
 import flixel.FlxG;
-import hxcodec.flixel.FlxVideo;
-import states.ConfigState;
-import states.PlayState;
+import flixel.video.FlxVideo;
 
 #if sys
 import sys.FileSystem;
 import sys.io.File;
 #end
 
-class IntroState extends FlxState
+class InitState extends FlxState
 {
-    override public function create():Void
+    var vid:FlxVideo;
+    var nextState:FlxState;
+
+    override public function create()
     {
         super.create();
 
-        var video = new FlxVideo();
-        
-        video.onEndReached.add(function() {
-            decideNextState();
-        });
+        vid = new FlxVideo();
+        vid.play("assets/videos/init.mp4");
 
-        video.play("assets/videos/init.mp4");
+        vid.finishCallback = function()
+        {
+            decideNextState();
+        };
     }
 
     function decideNextState():Void
     {
-        var nextState:FlxState = new ConfigState();
+        nextState = new ConfigState();
 
         #if sys
         var bootPath:String = "assets/data/firstboot.txt";
@@ -37,13 +38,22 @@ class IntroState extends FlxState
         {
             var content:String = File.getContent(bootPath);
 
-            if (content.indexOf("configured=true") != -1)
+            if (content != null && content.indexOf("configured=true") != -1)
             {
                 nextState = new PlayState();
             }
         }
         #end
+    }
 
-        FlxG.switchState(nextState);
+    override public function destroy()
+    {
+        if (vid != null)
+        {
+            vid.stop();
+            vid = null;
+        }
+
+        super.destroy();
     }
 }
