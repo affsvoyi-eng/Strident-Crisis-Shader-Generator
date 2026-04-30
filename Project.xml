@@ -7,5 +7,4 @@
     <assets path="assets" rename="assets" />
     <haxelib name="openfl" />
     <haxelib name="flixel" />
-    <haxelib name="flixel-video"  />
 </project>
