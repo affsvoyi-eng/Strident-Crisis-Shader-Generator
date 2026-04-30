@@ -22,7 +22,7 @@ import lime.ui.Window;
 
 import haxe.Http;
 
-import states.CustomWaveShader;
+import shader.CustomWaveShader;
 
     
 #if sys
