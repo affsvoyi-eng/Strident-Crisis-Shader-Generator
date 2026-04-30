@@ -23,6 +23,7 @@ jobs:
           haxelib install lime --quiet
           haxelib install openfl --quiet
           haxelib install flixel --quiet
+          haxelib install hxCodec --quiet
           haxelib install flixel-addons --quiet
           haxelib install flixel-tools --quiet
 
@@ -59,6 +60,7 @@ jobs:
           haxelib install lime --quiet
           haxelib install openfl --quiet
           haxelib install flixel --quiet
+          haxelib install hxCodec --quiet
           haxelib install flixel-addons --quiet
           haxelib install flixel-tools --quiet
 
@@ -93,6 +95,7 @@ jobs:
           haxelib install lime --quiet
           haxelib install openfl --quiet
           haxelib install flixel --quiet
+          haxelib install hxCodec --quiet
           haxelib install flixel-addons --quiet
           haxelib install flixel-tools --quiet
 
@@ -148,6 +151,7 @@ jobs:
           haxelib install lime --quiet
           haxelib install openfl --quiet
           haxelib install flixel --quiet
+          haxelib install hxCodec --quiet
           haxelib install flixel-tools --quiet
           haxelib install flixel-addons --quiet
           haxelib install hxcpp --quiet
