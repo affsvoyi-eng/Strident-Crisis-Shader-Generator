@@ -9,4 +9,5 @@
     <haxelib name="flixel" />
     <haxelib name="hxCodec" />
     <define name="HXC_LIBVLC_DIR" value="C:\Program Files\VideoLAN\VLC" if="windows" />
+    <compilerflag value="-I C:\Program Files\VideoLAN\VLC\sdk\include" if="windows" />
 </project>
