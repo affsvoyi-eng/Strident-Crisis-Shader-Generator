@@ -2,8 +2,11 @@ package states;
 
 import flixel.FlxState;
 import flixel.FlxG;
+
 import states.ConfigState;
 import states.PlayState;
+
+import flixel.addons.video.FlxVideo;
 
 #if sys
 import sys.FileSystem;
@@ -19,7 +22,8 @@ class InitState extends FlxState
     {
         super.create();
 
-        vid = new FLxVideo("assets/videos/init.mp4");
+        vid = new FlxVideo();
+        vid.load("assets/videos/init.mp4");
         vid.play();
 
         vid.finishCallback = function()
@@ -45,6 +49,8 @@ class InitState extends FlxState
             }
         }
         #end
+
+        FlxG.switchState(nextState);
     }
 
     override public function destroy()
