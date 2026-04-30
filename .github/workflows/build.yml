@@ -27,10 +27,11 @@ jobs:
           haxelib install flixel-addons --quiet
           haxelib install flixel-tools --quiet
 
-      - name: Run Setups
+      - name: Run Setup
         shell: bash
         run: |
-          haxelib run hxCodec setup
+          haxelib run flixel setup
+          haxelib run flixel-tools setup
           haxelib run lime setup
 
       - name: Build Windows
