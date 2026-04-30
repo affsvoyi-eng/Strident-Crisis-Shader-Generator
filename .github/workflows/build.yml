@@ -23,7 +23,6 @@ jobs:
           haxelib install lime --quiet
           haxelib install openfl --quiet
           haxelib install flixel --quiet
-          haxelib install flixel-video --quiet
           haxelib install flixel-addons --quiet
           haxelib install flixel-tools --quiet
 
