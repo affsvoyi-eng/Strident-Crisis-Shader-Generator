@@ -2,7 +2,8 @@ package states;
 
 import flixel.FlxState;
 import flixel.FlxG;
-import flixel.video.FlxVideo;
+import states.ConfigState;
+import states.PlayState;
 
 #if sys
 import sys.FileSystem;
@@ -18,8 +19,8 @@ class InitState extends FlxState
     {
         super.create();
 
-        vid = new FlxVideo();
-        vid.play("assets/videos/init.mp4");
+        vid = new FLxVideo({source: 'assets/videos/init.mp4'});
+        vid.play();
 
         vid.finishCallback = function()
         {
