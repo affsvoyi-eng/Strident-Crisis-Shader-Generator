@@ -5,8 +5,9 @@ import flixel.FlxG;
 import states.PlayState;
 import states.ConfigState;
 
-// Se estiver usando o hxCodec (recomendado no vídeo para desktop), importe-o aqui.
-// import hxcodec.flixel.FlxVideo; 
+#if desktop
+import hxcodec.flixel.FlxVideo; 
+#end
 
 #if sys
 import sys.FileSystem;
