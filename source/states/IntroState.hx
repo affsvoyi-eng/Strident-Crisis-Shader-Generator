@@ -19,7 +19,7 @@ class InitState extends FlxState
     {
         super.create();
 
-        vid = new FLxVideo({source: 'assets/videos/init.mp4'});
+        vid = new FLxVideo("assets/videos/init.mp4");
         vid.play();
 
         vid.finishCallback = function()
