@@ -30,8 +30,6 @@ jobs:
       - name: Run Setup
         shell: bash
         run: |
-          haxelib run flixel setup
-          haxelib run flixel-tools setup
           haxelib run lime setup
 
       - name: Build Windows
