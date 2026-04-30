@@ -6,35 +6,70 @@ import flixel.FlxG;
 import states.ConfigState;
 import states.PlayState;
 
-import flixel.addons.video.FlxVideo;
+import openfl.media.Video;
+import openfl.media.VideoStream;
+import openfl.display.Sprite;
+import openfl.events.Event;
 
 #if sys
 import sys.FileSystem;
 import sys.io.File;
 #end
 
-class InitState extends FlxState
+class IntroState extends FlxState
 {
-    var vid:FlxVideo;
-    var nextState:FlxState;
+    var video:Video;
+    var container:Sprite;
 
     override public function create()
     {
         super.create();
 
-        vid = new FlxVideo();
-        vid.load("assets/videos/init.mp4");
-        vid.play();
+        container = new Sprite();
+        FlxG.stage.addChild(container);
 
-        vid.finishCallback = function()
+        video = new Video();
+        video.x = 0;
+        video.y = 0;
+
+        container.addChild(video);
+
+        video.attachNetStream(new VideoStream());
+        video.attachNetStream(null); 
+
+        var url = "assets/videos/init.mp4";
+        video.attachNetStream(new openfl.net.NetStream(new openfl.net.NetConnection()));
+
+        video.addEventListener(Event.COMPLETE, onVideoEnd);
+        FlxG.stage.addEventListener(Event.ENTER_FRAME, checkVideoEnd);
+    }
+
+    function checkVideoEnd(e:Event):Void
+    {
+        if (video == null) return;
+
+        if (video.playing == false)
         {
-            decideNextState();
-        };
+            finishVideo();
+        }
+    }
+
+    function onVideoEnd(e:Event):Void
+    {
+        finishVideo();
+    }
+
+    function finishVideo():Void
+    {
+        if (container != null && container.parent != null)
+            FlxG.stage.removeChild(container);
+
+        decideNextState();
     }
 
     function decideNextState():Void
     {
-        nextState = new ConfigState();
+        var nextState:FlxState = new ConfigState();
 
         #if sys
         var bootPath:String = "assets/data/firstboot.txt";
@@ -55,10 +90,15 @@ class InitState extends FlxState
 
     override public function destroy()
     {
-        if (vid != null)
+        if (video != null)
         {
-            vid.stop();
-            vid = null;
+            video = null;
+        }
+
+        if (container != null)
+        {
+            FlxG.stage.removeChild(container);
+            container = null;
         }
 
         super.destroy();
