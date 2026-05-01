@@ -2,7 +2,8 @@ package;
 
 import openfl.display.Sprite;
 import flixel.FlxGame;
-import flixel.system.FlxSplash;
+
+import states.SplashState;
 
 class Main extends Sprite
 {
@@ -12,12 +13,10 @@ class Main extends Sprite
     {
         super();
 
-        FlxSplash.nextState = states.IntroState;
-
         var game:FlxGame = new FlxGame(
             0,
             0,
-            FlxSplash,
+            SplashState,
             60,
             60,
             true
