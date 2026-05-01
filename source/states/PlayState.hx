@@ -10,21 +10,17 @@ import flixel.tweens.FlxEase;
 
 import openfl.net.FileReference;
 import openfl.events.Event;
+import openfl.events.UncaughtErrorEvent;
 import openfl.net.FileFilter;
 import openfl.display.Loader;
 import openfl.display.Bitmap;
-import openfl.net.URLRequest;
 import openfl.Lib;
-import openfl.media.Sound;
 
 import lime.app.Application;
 import lime.ui.Window;
 
-import haxe.Http;
-
 import shader.WiggleEffect;
 
-    
 #if sys
 import sys.io.File;
 import sys.FileSystem;
@@ -56,12 +52,12 @@ class PlayState extends FlxState
     var defaultImage:String = "assets/images/bg/cheeseburger.png";
 
     var currentVersion:String = "0.0.6";
-    var latestVersion:String = "";
-    var updateAvailable:Bool = false;
 
     override public function create():Void
     {
         super.create();
+
+        initCrashHandler();
 
         loadSettings();
 
@@ -71,7 +67,6 @@ class PlayState extends FlxState
         add(bg);
 
         shader = new WiggleEffect();
-
         shader.uTime.value = [0.0];
         shader.uSpeed.value = [speed];
         shader.uFrequency.value = [frequency];
@@ -202,6 +197,47 @@ class PlayState extends FlxState
         updateBrightness();
     }
 
+    function initCrashHandler():Void
+    {
+        Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(
+            UncaughtErrorEvent.UNCAUGHT_ERROR,
+            function(e:UncaughtErrorEvent):Void
+            {
+                var errorMsg:String = "Unknown Crash";
+
+                if (e.error != null)
+                    errorMsg = Std.string(e.error);
+
+                #if sys
+                try
+                {
+                    if (!FileSystem.exists("crash"))
+                        FileSystem.createDirectory("crash");
+
+                    var crashLog:String =
+                        "PlayState Crash Report\n" +
+                        "====================\n" +
+                        "Version: " + currentVersion + "\n" +
+                        "Error: " + errorMsg + "\n" +
+                        "WaveAmplitude: " + waveAmplitude + "\n" +
+                        "Frequency: " + frequency + "\n" +
+                        "Speed: " + speed + "\n" +
+                        "Brightness: " + brightness + "\n";
+
+                    File.saveContent(
+                        "crash/playstate_crash_" + Date.now().getTime() + ".txt",
+                        crashLog
+                    );
+                }
+                catch (saveError:Dynamic) {}
+
+                #end
+
+                FlxG.log.error("CRASH DETECTED: " + errorMsg);
+            }
+        );
+    }
+
     override public function update(elapsed:Float):Void
     {
         super.update(elapsed);
@@ -255,26 +291,26 @@ class PlayState extends FlxState
     }
 
     function closeGame():Void
-{
-    #if desktop
-    var window:Window = Application.current.window;
+    {
+        #if desktop
+        var window:Window = Application.current.window;
 
-    FlxTween.tween(window, {
-        width: 100,
-        height: 60
-    }, 0.4, {
-        ease: FlxEase.quadIn,
-        onComplete: function(_)
-        {
-            #if sys
-            Sys.exit(0);
-            #else
-            Lib.close();
-            #end
-        }
-    });
-    #end
-}
+        FlxTween.tween(window, {
+            width: 100,
+            height: 60
+        }, 0.4, {
+            ease: FlxEase.quadIn,
+            onComplete: function(_)
+            {
+                #if sys
+                Sys.exit(0);
+                #else
+                Lib.close();
+                #end
+            }
+        });
+        #end
+    }
 
     function loadSettings():Void
     {
@@ -320,11 +356,12 @@ class PlayState extends FlxState
     }
 
     function loadImage():Void
-{
-    fileRef = new FileReference();
-    fileRef.addEventListener(Event.SELECT, onFileSelected);
-    fileRef.browse([new FileFilter("Images", "*.png;*.jpg;*.jpeg")]);
-}
+    {
+        fileRef = new FileReference();
+        fileRef.addEventListener(Event.SELECT, onFileSelected);
+        fileRef.browse([new FileFilter("Images", "*.png;*.jpg;*.jpeg")]);
+    }
+
     function onFileSelected(e:Event):Void
     {
         fileRef.addEventListener(Event.COMPLETE, onFileLoaded);
