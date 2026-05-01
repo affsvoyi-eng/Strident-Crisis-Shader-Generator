@@ -29,6 +29,10 @@ class ConfigState extends FlxState
     override public function create():Void
     {
         super.create();
+        bg = new FlxSprite();
+        bg.loadGraphic("assets/images/Init/Initbg");
+        bg.ScreenCenter();
+        add(bg);
 
         #if mobile
         FlxG.resizeGame(1280, 720);
