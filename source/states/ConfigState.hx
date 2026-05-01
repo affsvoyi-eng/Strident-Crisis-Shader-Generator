@@ -5,6 +5,8 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
+import openfl.Lib;
+import openfl.events.UncaughtErrorEvent;
 import states.PlayState;
 import shader.GlitchEffect;
 
@@ -33,6 +35,8 @@ class ConfigState extends FlxState
     override public function create():Void
     {
         super.create();
+
+        initCrashHandler();
 
         bg = new FlxSprite();
         bg.loadGraphic("assets/images/Init/Initbg.png");
@@ -114,6 +118,39 @@ class ConfigState extends FlxState
             #end
         }));
         #end
+    }
+
+    function initCrashHandler():Void
+    {
+        Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(
+            UncaughtErrorEvent.UNCAUGHT_ERROR,
+            function(e:UncaughtErrorEvent):Void
+            {
+                var errorMsg:String = "Unknown Crash";
+
+                if (e.error != null)
+                    errorMsg = Std.string(e.error);
+
+                #if sys
+                try
+                {
+                    if (!FileSystem.exists("crash"))
+                        FileSystem.createDirectory("crash");
+
+                    var crashLog:String =
+                        "Crash Report\n" +
+                        "====================\n" +
+                        "Error: " + errorMsg + "\n" +
+                        "State: ConfigState\n";
+
+                    File.saveContent("crash/crash_" + Date.now().getTime() + ".txt", crashLog);
+                }
+                catch (saveError:Dynamic) {}
+                #end
+
+                FlxG.log.error("CRASH DETECTED: " + errorMsg);
+            }
+        );
     }
 
     function updateTexts():Void
