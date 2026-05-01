@@ -5,6 +5,7 @@ import flixel.FlxG;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import states.PlayState;
+import shader.CustomWaveShader;
 
 #if sys
 import sys.io.File;
