@@ -59,7 +59,7 @@ class PlayState extends FlxState
 
     var recordBtn:FlxButton;
     var isRecording:Bool = false;
-    var recordingFPS:Int = 60;
+    var recordingFPS:Int = 20;
     var recordingFrames:Int = 20;
 
     override public function create():Void
@@ -257,7 +257,6 @@ class PlayState extends FlxState
             FileSystem.createDirectory(folder);
 
         var frameCount:Int = 0;
-
         var timer = new FlxTimer();
 
         timer.start(1 / recordingFPS, function(tmr:FlxTimer)
@@ -306,9 +305,7 @@ class PlayState extends FlxState
             for (file in FileSystem.readDirectory(folder))
             {
                 if (StringTools.endsWith(file, ".png"))
-                {
                     FileSystem.deleteFile(folder + "/" + file);
-                }
             }
 
             FlxG.log.notice("MP4 saved to: " + output);
@@ -458,31 +455,4 @@ class PlayState extends FlxState
 
         loader.loadBytes(fileRef.data);
     }
-    function loadImage():Void
-    {
-        fileRef = new FileReference();
-        fileRef.addEventListener(Event.SELECT, onFileSelected);
-        fileRef.browse([new FileFilter("Images", "*.png;*.jpg;*.jpeg")]);
-    }
-
-    function onFileSelected(e:Event):Void
-    {
-        fileRef.addEventListener(Event.COMPLETE, onFileLoaded);
-        fileRef.load();
-    }
-
-    function onFileLoaded(e:Event):Void
-    {
-        var loader = new Loader();
-
-        loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(_)
-        {
-            var bmp:Bitmap = cast loader.content;
-            bg.loadGraphic(bmp.bitmapData);
-            fitImageToScreen();
-            bg.shader = shader;
-        });
-
-        loader.loadBytes(fileRef.data);
-    }
-}
+            }
