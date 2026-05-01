@@ -11,8 +11,15 @@ class Main extends Sprite
     {
         super();
         
-        // Inicia o jogo diretamente no IntroState.
-        // É lá que o vídeo será tocado e a decisão será tomada.
-        addChild(new FlxGame(0, 0, IntroState, 1, 60, 60, false));
+        var game:FlxGame = new FlxGame(
+            0,
+            0,
+            IntroState,
+            60,
+            60,
+            true
+        );
+
+        addChild(game);
     }
 }
