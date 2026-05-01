@@ -7,7 +7,6 @@ import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
-import flixel.util.FlxTimer;
 
 import openfl.net.FileReference;
 import openfl.events.Event;
@@ -15,10 +14,10 @@ import openfl.events.UncaughtErrorEvent;
 import openfl.net.FileFilter;
 import openfl.display.Loader;
 import openfl.display.Bitmap;
-import openfl.display.BitmapData;
-import openfl.display.PNGEncoderOptions;
-import openfl.geom.Rectangle;
-import openfl.utils.ByteArray;
+import openfl.display.Sprite;
+import openfl.text.TextField;
+import openfl.text.TextFormat;
+import openfl.text.TextFieldAutoSize;
 import openfl.Lib;
 
 import lime.app.Application;
@@ -29,7 +28,6 @@ import shader.WiggleEffect;
 #if sys
 import sys.io.File;
 import sys.FileSystem;
-import sys.io.Process;
 #end
 
 class PlayState extends FlxState
@@ -56,11 +54,6 @@ class PlayState extends FlxState
 
     var defaultImage:String = "assets/images/bg/cheeseburger.png";
     var currentVersion:String = "0.0.6";
-
-    var recordBtn:FlxButton;
-    var isRecording:Bool = false;
-    var recordingFPS:Int = 60;
-    var recordingFrames:Int = 20;
 
     override public function create():Void
     {
@@ -114,13 +107,21 @@ class PlayState extends FlxState
         add(resetBtn);
         uiElements.push(resetBtn);
 
-        recordBtn = new FlxButton(20, 380, "Record MP4", function()
+        var saveBtn = new FlxButton(260, FlxG.height - 80, "Save Settings", function()
         {
-            if (!isRecording)
-                startRecording();
+            playClick();
+            saveSettings();
         });
-        add(recordBtn);
-        uiElements.push(recordBtn);
+        add(saveBtn);
+        uiElements.push(saveBtn);
+
+        var configBtn = new FlxButton(500, FlxG.height - 80, "Config Menu", function()
+        {
+            playClick();
+            FlxG.switchState(new ConfigState());
+        });
+        add(configBtn);
+        uiElements.push(configBtn);
 
         ampText = new FlxText(20, 70, 400, "Wave Amplitude: " + waveAmplitude);
         add(ampText);
@@ -182,6 +183,22 @@ class PlayState extends FlxState
         add(speedPlus);
         uiElements.push(speedPlus);
 
+        var brightMinus = new FlxButton(20, 300, "-", function()
+        {
+            brightness = Math.max(0, brightness - 0.1);
+            updateBrightness();
+        });
+        add(brightMinus);
+        uiElements.push(brightMinus);
+
+        var brightPlus = new FlxButton(120, 300, "+", function()
+        {
+            brightness = Math.min(1, brightness + 0.1);
+            updateBrightness();
+        });
+        add(brightPlus);
+        uiElements.push(brightPlus);
+
         timeText = new FlxText(20, 330, 400, "Time: 0");
         add(timeText);
         uiElements.push(timeText);
@@ -215,9 +232,36 @@ class PlayState extends FlxState
                 catch (saveError:Dynamic) {}
                 #end
 
-                FlxG.log.error("CRASH DETECTED: " + errorMsg);
+                showCrashPopup(errorMsg);
             }
         );
+    }
+
+    function showCrashPopup(errorMsg:String):Void
+    {
+        var popup:Sprite = new Sprite();
+
+        popup.graphics.beginFill(0x000000, 0.85);
+        popup.graphics.drawRect(0, 0, FlxG.width, FlxG.height);
+        popup.graphics.endFill();
+
+        var errorText:TextField = new TextField();
+        errorText.defaultTextFormat = new TextFormat("_sans", 24, 0xFF0000, true);
+        errorText.text =
+            "ENGINE CRASH DETECTED\n\n" +
+            errorMsg +
+            "\n\nCrash log saved in /crash folder.";
+        errorText.width = FlxG.width - 100;
+        errorText.multiline = true;
+        errorText.wordWrap = true;
+        errorText.autoSize = TextFieldAutoSize.CENTER;
+
+        errorText.x = 50;
+        errorText.y = FlxG.height / 2 - 150;
+
+        popup.addChild(errorText);
+
+        Lib.current.addChild(popup);
     }
 
     override public function update(elapsed:Float):Void
@@ -227,7 +271,7 @@ class PlayState extends FlxState
         shader.uTime.value[0] += elapsed;
         timeText.text = "Time: " + Std.string(Std.int(shader.uTime.value[0] * 100) / 100);
 
-        if (FlxG.keys.justPressed.SPACE && !isRecording)
+        if (FlxG.keys.justPressed.SPACE)
         {
             uiVisible = !uiVisible;
 
@@ -239,99 +283,6 @@ class PlayState extends FlxState
         }
     }
 
-    function startRecording():Void
-    {
-        isRecording = true;
-
-        for (e in uiElements)
-        {
-            e.visible = false;
-            e.active = false;
-        }
-
-        #if sys
-        var folder:String = "recordings";
-        var output:String = folder + "/output_" + Date.now().getTime() + ".mp4";
-
-        if (!FileSystem.exists(folder))
-            FileSystem.createDirectory(folder);
-
-        var frameCount:Int = 0;
-        var timer = new FlxTimer();
-
-        timer.start(1 / recordingFPS, function(tmr:FlxTimer)
-        {
-            var bmp:BitmapData = new BitmapData(FlxG.width, FlxG.height);
-            bmp.draw(FlxG.stage);
-
-            var bytes:ByteArray = bmp.encode(
-                new Rectangle(0, 0, bmp.width, bmp.height),
-                new PNGEncoderOptions()
-            );
-
-            File.saveBytes(
-                folder + "/frame_" + StringTools.lpad("" + frameCount, "0", 5) + ".png",
-                bytes
-            );
-
-            frameCount++;
-
-            if (frameCount >= recordingFrames)
-            {
-                timer.cancel();
-                convertFramesToVideo(folder, output);
-            }
-
-        }, recordingFrames);
-        #end
-    }
-
-    function convertFramesToVideo(folder:String, output:String):Void
-    {
-        #if sys
-        try
-        {
-            var ffmpeg = new Process("ffmpeg", [
-                "-y",
-                "-framerate", Std.string(recordingFPS),
-                "-i", folder + "/frame_%05d.png",
-                "-c:v", "libx264",
-                "-pix_fmt", "yuv420p",
-                output
-            ]);
-
-            ffmpeg.close();
-
-            for (file in FileSystem.readDirectory(folder))
-            {
-                if (StringTools.endsWith(file, ".png"))
-                    FileSystem.deleteFile(folder + "/" + file);
-            }
-
-            FlxG.log.notice("MP4 saved to: " + output);
-        }
-        catch (e:Dynamic)
-        {
-            FlxG.log.error("FFmpeg conversion failed: " + Std.string(e));
-        }
-        #end
-
-        finishRecording();
-    }
-
-    function finishRecording():Void
-    {
-        isRecording = false;
-
-        for (e in uiElements)
-        {
-            e.visible = true;
-            e.active = true;
-        }
-
-        FlxG.log.notice("Recording complete!");
-    }
-
     function resetDefaults():Void
     {
         waveAmplitude = 0.1;
@@ -341,6 +292,30 @@ class PlayState extends FlxState
 
         updateShaderValues();
         updateBrightness();
+    }
+
+    function saveSettings():Void
+    {
+        var content:String =
+            "waveAmplitude=" + waveAmplitude + "\n" +
+            "frequency=" + frequency + "\n" +
+            "speed=" + speed + "\n" +
+            "brightness=" + brightness + "\n" +
+            "uiVisible=" + uiVisible;
+
+        #if sys
+        try
+        {
+            if (!FileSystem.exists("assets/data"))
+                FileSystem.createDirectory("assets/data");
+
+            File.saveContent("assets/data/settings.txt", content);
+        }
+        catch (e:Dynamic)
+        {
+            showCrashPopup("Failed to save settings:\n" + Std.string(e));
+        }
+        #end
     }
 
     function updateBrightness():Void
@@ -407,6 +382,8 @@ class PlayState extends FlxState
                 case "waveAmplitude": waveAmplitude = Std.parseFloat(parts[1]);
                 case "frequency": frequency = Std.parseFloat(parts[1]);
                 case "speed": speed = Std.parseFloat(parts[1]);
+                case "brightness": brightness = Std.parseFloat(parts[1]);
+                case "uiVisible": uiVisible = (parts[1] == "true");
             }
         }
         #end
