@@ -49,7 +49,7 @@ class PlayState extends FlxState
     var uiElements:Array<Dynamic> = [];
 
     var defaultImage:String = "assets/images/bg/cheeseburger.png";
-    var currentVersion:String = "0.0.6";
+    var currentVersion:String = "0.0.7";
 
     override public function create():Void
     {
