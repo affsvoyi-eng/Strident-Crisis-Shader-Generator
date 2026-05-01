@@ -59,7 +59,7 @@ class PlayState extends FlxState
 
     var recordBtn:FlxButton;
     var isRecording:Bool = false;
-    var recordingFPS:Int = 20;
+    var recordingFPS:Int = 60;
     var recordingFrames:Int = 20;
 
     override public function create():Void
