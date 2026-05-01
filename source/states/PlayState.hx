@@ -70,7 +70,7 @@ class PlayState extends FlxState
         fitImageToScreen();
         add(bg);
 
-        shader = new CustomWaveShader();
+        shader = new WiggleEffect();
 
         shader.uTime.value = [0.0];
         shader.uSpeed.value = [speed];
