@@ -2,7 +2,7 @@ package shader;
 
 import flixel.system.FlxAssets.FlxShader;
 
-class CustomWaveShader extends FlxShader
+class WiggleEffect extends FlxShader
 {
 @:glFragmentSource('
 #pragma header
