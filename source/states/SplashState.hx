@@ -5,9 +5,18 @@ import flixel.FlxG;
 
 class SplashState extends FlxSplash
 {
-    override public function onComplete():Void
+    override public function create():Void
     {
-        super.onComplete();
-        FlxG.switchState(new IntroState());
+        super.create();
+    }
+
+    override public function update(elapsed:Float):Void
+    {
+        super.update(elapsed);
+
+        if (finished)
+        {
+            FlxG.switchState(new IntroState());
+        }
     }
 }
