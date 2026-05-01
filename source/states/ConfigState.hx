@@ -8,7 +8,7 @@ import flixel.ui.FlxButton;
 import openfl.Lib;
 import openfl.events.UncaughtErrorEvent;
 import states.PlayState;
-import shader.GlitchEffect;
+import shader.Shaders;
 
 #if sys
 import sys.io.File;
