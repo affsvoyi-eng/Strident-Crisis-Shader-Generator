@@ -53,15 +53,13 @@ jobs:
           haxelib install lime --quiet
           haxelib install openfl --quiet
           haxelib install flixel --quiet
-          haxelib install hxCodec --quiet
           haxelib install flixel-tools --quiet
           haxelib install flixel-addons --quiet
           haxelib install hxcpp --quiet
 
-      - name: Run Setups
+      - name: Run Setup
         shell: bash
         run: |
-          haxelib run hxCodec setup
           haxelib run lime setup
 
       - name: Configure Android
