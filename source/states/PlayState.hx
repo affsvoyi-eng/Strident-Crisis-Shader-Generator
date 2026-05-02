@@ -55,6 +55,10 @@ class PlayState extends FlxState
     {
         super.create();
 
+        #if mobile
+        FlxG.resizeGame(1280, 720);
+        #end
+
         initCrashHandler();
         loadSettings();
 
@@ -68,126 +72,126 @@ class PlayState extends FlxState
         shader.uSpeed.value = [speed];
         shader.uFrequency.value = [frequency];
         shader.uWaveAmplitude.value = [waveAmplitude];
-
         bg.shader = shader;
 
         brightnessOverlay = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF000000);
         brightnessOverlay.scrollFactor.set();
         add(brightnessOverlay);
 
-        versionText = new FlxText(20, FlxG.height - 50, 500, "Version: " + currentVersion);
-        add(versionText);
-        uiElements.push(versionText);
+        createUI();
+        updateBrightness();
+    }
 
+    function createUI():Void
+    {
+        var buttonScale:Float = #if mobile 1.5 #else 1.0 #end;
+
+        versionText = new FlxText(20, FlxG.height - 50, 500, "Version: " + currentVersion);
+        addUI(versionText);
+
+        #if !mobile
         var loadBtn = new FlxButton(20, 20, "Add Image", function()
         {
             playClick();
             loadImage();
         });
-        add(loadBtn);
-        uiElements.push(loadBtn);
+        scaleButton(loadBtn, buttonScale);
+        addUI(loadBtn);
+        #end
 
-        var exitBtn = new FlxButton(FlxG.width - 100, 20, "Exit", function()
+        var exitBtn = new FlxButton(FlxG.width - 120, 20, "Exit", function()
         {
             playClick();
             closeGame();
         });
-        add(exitBtn);
-        uiElements.push(exitBtn);
+        scaleButton(exitBtn, buttonScale);
+        addUI(exitBtn);
 
         var resetBtn = new FlxButton(20, FlxG.height - 80, "Reset", function()
         {
             playClick();
             resetDefaults();
         });
-        add(resetBtn);
-        uiElements.push(resetBtn);
+        scaleButton(resetBtn, buttonScale);
+        addUI(resetBtn);
 
-        ampText = new FlxText(20, 70, 400, "Wave Amplitude: " + waveAmplitude);
-        add(ampText);
-        uiElements.push(ampText);
+        ampText = new FlxText(20, 70, 400, "");
+        freqText = new FlxText(20, 140, 400, "");
+        speedText = new FlxText(20, 210, 400, "");
+        timeText = new FlxText(20, 330, 400, "Time: 0");
 
-        var ampMinus = new FlxButton(20, 95, "-", function()
-        {
+        addUI(ampText);
+        addUI(freqText);
+        addUI(speedText);
+        addUI(timeText);
+
+        createControlButtons(buttonScale);
+
+        #if !mobile
+        var toggleText = new FlxText(20, FlxG.height - 30, 500, "Press SPACE to toggle UI");
+        addUI(toggleText);
+        #end
+
+        updateShaderValues();
+    }
+
+    function createControlButtons(scale:Float):Void
+    {
+        createPair(20, 95, function() {
             waveAmplitude = Math.max(0, waveAmplitude - 0.005);
             updateShaderValues();
-        });
-        add(ampMinus);
-        uiElements.push(ampMinus);
-
-        var ampPlus = new FlxButton(120, 95, "+", function()
-        {
+        }, function() {
             waveAmplitude += 0.005;
             updateShaderValues();
-        });
-        add(ampPlus);
-        uiElements.push(ampPlus);
+        }, scale);
 
-        freqText = new FlxText(20, 140, 400, "Frequency: " + frequency);
-        add(freqText);
-        uiElements.push(freqText);
-
-        var freqMinus = new FlxButton(20, 165, "-", function()
-        {
+        createPair(20, 165, function() {
             frequency = Math.max(1, frequency - 1);
             updateShaderValues();
-        });
-        add(freqMinus);
-        uiElements.push(freqMinus);
-
-        var freqPlus = new FlxButton(120, 165, "+", function()
-        {
+        }, function() {
             frequency += 1;
             updateShaderValues();
-        });
-        add(freqPlus);
-        uiElements.push(freqPlus);
+        }, scale);
 
-        speedText = new FlxText(20, 210, 400, "Speed: " + speed);
-        add(speedText);
-        uiElements.push(speedText);
-
-        var speedMinus = new FlxButton(20, 235, "-", function()
-        {
+        createPair(20, 235, function() {
             speed = Math.max(0.1, speed - 0.1);
             updateShaderValues();
-        });
-        add(speedMinus);
-        uiElements.push(speedMinus);
-
-        var speedPlus = new FlxButton(120, 235, "+", function()
-        {
+        }, function() {
             speed += 0.1;
             updateShaderValues();
-        });
-        add(speedPlus);
-        uiElements.push(speedPlus);
+        }, scale);
 
-        var brightMinus = new FlxButton(20, 300, "-", function()
-        {
+        createPair(20, 300, function() {
             brightness = Math.max(0, brightness - 0.1);
             updateBrightness();
-        });
-        add(brightMinus);
-        uiElements.push(brightMinus);
-
-        var brightPlus = new FlxButton(120, 300, "+", function()
-        {
+        }, function() {
             brightness = Math.min(1, brightness + 0.1);
             updateBrightness();
-        });
-        add(brightPlus);
-        uiElements.push(brightPlus);
+        }, scale);
+    }
 
-        timeText = new FlxText(20, 330, 400, "Time: 0");
-        add(timeText);
-        uiElements.push(timeText);
+    function createPair(x:Float, y:Float, minusFunc:Void->Void, plusFunc:Void->Void, scale:Float):Void
+    {
+        var minus = new FlxButton(x, y, "-", minusFunc);
+        var plus = new FlxButton(x + 100, y, "+", plusFunc);
 
-        var toggleText = new FlxText(20, FlxG.height - 30, 500, "Press SPACE to toggle UI");
-        add(toggleText);
-        uiElements.push(toggleText);
+        scaleButton(minus, scale);
+        scaleButton(plus, scale);
 
-        updateBrightness();
+        addUI(minus);
+        addUI(plus);
+    }
+
+    function addUI(obj:Dynamic):Void
+    {
+        add(obj);
+        uiElements.push(obj);
+    }
+
+    function scaleButton(button:FlxButton, scale:Float):Void
+    {
+        button.scale.set(scale, scale);
+        button.updateHitbox();
     }
 
     function initCrashHandler():Void
@@ -224,6 +228,7 @@ class PlayState extends FlxState
         shader.uTime.value[0] += elapsed;
         timeText.text = "Time: " + Std.string(Std.int(shader.uTime.value[0] * 100) / 100);
 
+        #if !mobile
         if (FlxG.keys.justPressed.SPACE)
         {
             uiVisible = !uiVisible;
@@ -234,6 +239,7 @@ class PlayState extends FlxState
                 e.active = uiVisible;
             }
         }
+        #end
     }
 
     function resetDefaults():Void
@@ -261,6 +267,8 @@ class PlayState extends FlxState
         ampText.text = "Wave Amplitude: " + waveAmplitude;
         freqText.text = "Frequency: " + frequency;
         speedText.text = "Speed: " + speed;
+
+        saveSettings();
     }
 
     function playClick():Void
@@ -270,7 +278,10 @@ class PlayState extends FlxState
 
     function closeGame():Void
     {
-        #if desktop
+        #if mobile
+        Lib.close();
+
+        #elseif desktop
         var window:Window = Application.current.window;
 
         FlxTween.tween(window, {
@@ -292,9 +303,19 @@ class PlayState extends FlxState
 
     function loadSettings():Void
     {
+        #if mobile
+        if (FlxG.save.data.waveAmplitude != null)
+            waveAmplitude = FlxG.save.data.waveAmplitude;
+
+        if (FlxG.save.data.frequency != null)
+            frequency = FlxG.save.data.frequency;
+
+        if (FlxG.save.data.speed != null)
+            speed = FlxG.save.data.speed;
+
+        #elseif sys
         var path = "assets/data/settings.txt";
 
-        #if sys
         if (!FileSystem.exists(path))
             return;
 
@@ -316,6 +337,16 @@ class PlayState extends FlxState
         #end
     }
 
+    function saveSettings():Void
+    {
+        #if mobile
+        FlxG.save.data.waveAmplitude = waveAmplitude;
+        FlxG.save.data.frequency = frequency;
+        FlxG.save.data.speed = speed;
+        FlxG.save.flush();
+        #end
+    }
+
     function fitImageToScreen():Void
     {
         if (bg == null || bg.graphic == null) return;
@@ -332,6 +363,7 @@ class PlayState extends FlxState
         bg.screenCenter();
     }
 
+    #if !mobile
     function loadImage():Void
     {
         fileRef = new FileReference();
@@ -359,4 +391,5 @@ class PlayState extends FlxState
 
         loader.loadBytes(fileRef.data);
     }
+    #end
             }
