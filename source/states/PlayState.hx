@@ -94,6 +94,14 @@ override public function create():Void
     });  
     add(exitBtn);  
     uiElements.push(exitBtn);  
+    
+    var bloomBtn = new FlxButton(FlxG.width - 100, FlxG.height - 80, "Enter In BloomState", function()  
+    {  
+        playClick();  
+        FlxG.switchState(new BloomState());
+    });  
+    add(bloomBtn);  
+    uiElements.push(bloomBtn);  
 
     var resetBtn = new FlxButton(20, FlxG.height - 80, "Reset", function()  
     {  
