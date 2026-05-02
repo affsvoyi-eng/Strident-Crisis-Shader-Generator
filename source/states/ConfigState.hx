@@ -34,7 +34,8 @@ class ConfigState extends FlxState
     override public function create():Void
     {
         super.create();
-
+createReadme();
+        
         #if sys
         if (!FileSystem.exists("assets/crash"))
             FileSystem.createDirectory("assets/crash");
@@ -236,6 +237,105 @@ class ConfigState extends FlxState
 
         FlxG.switchState(new PlayState());
     }
+
+    function createReadme():Void
+{
+    #if sys
+    var readmePath:String = "assets/DO NOT readme.txt";
+
+    if (!FileSystem.exists(readmePath))
+    {
+        var readmeContent:String =
+" ███████╗████████╗██████╗ ██╗██████╗ ███████╗███╗   ██╗████████╗\n" +
+" ██╔════╝╚══██╔══╝██╔══██╗██║██╔══██╗██╔════╝████╗  ██║╚══██╔══╝\n" +
+" ███████╗   ██║   ██████╔╝██║██║  ██║█████╗  ██╔██╗ ██║   ██║   \n" +
+" ╚════██║   ██║   ██╔══██╗██║██║  ██║██╔══╝  ██║╚██╗██║   ██║   \n" +
+" ███████║   ██║   ██║  ██║██║██████╔╝███████╗██║ ╚████║   ██║   \n" +
+" ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝   \n\n" +
+
+"STRIDENT CRISIS SHADER GENERATOR\n" +
+"========================================\n\n" +
+
+"HEY!\n" +
+"Thanks for downloading Strident Crisis Shader Generator!\n\n" +
+
+"This project is a visual rendering and shader development framework.\n" +
+"It allows advanced shader generation, glitch systems, wave distortions,\n" +
+"CRT simulation, corruption effects, and full visual experimentation.\n\n" +
+
+"##################################################################################\n" +
+"PERMISSIONS\n" +
+"##################################################################################\n\n" +
+
+"You have FULL PERMISSION to:\n" +
+"- Modify\n" +
+"- Fork\n" +
+"- Expand\n" +
+"- Stream\n" +
+"- Upload\n" +
+"- Showcase\n" +
+"- Monetize original creations\n" +
+"- Build your own systems\n\n" +
+
+"##################################################################################\n" +
+"CORE FEATURES\n" +
+"##################################################################################\n\n" +
+
+"- Real-time shader editing\n" +
+"- Wave systems\n" +
+"- Glitch effects\n" +
+"- RGB split\n" +
+"- CRT filters\n" +
+"- Bloom layers\n" +
+"- Visual corruption systems\n" +
+"- HaxeFlixel integration\n" +
+"- Mobile/Desktop support\n" +
+"- Export systems\n\n" +
+
+"##################################################################################\n" +
+"CONFIG SYSTEM\n" +
+"##################################################################################\n\n" +
+
+"This setup menu allows:\n" +
+"- Default shader configuration\n" +
+"- Amplitude tuning\n" +
+"- Frequency tuning\n" +
+"- Speed tuning\n" +
+"- First boot initialization\n" +
+"- Crash logging\n" +
+"- Save management\n\n" +
+
+"##################################################################################\n" +
+"WARNING\n" +
+"##################################################################################\n\n" +
+
+"Heavy shader combinations may:\n" +
+"- Reduce FPS\n" +
+"- Increase compile times\n" +
+"- Cause mobile lag\n" +
+"- Stress GPUs\n\n" +
+
+"Optimize before release.\n\n" +
+
+"##################################################################################\n" +
+"FINAL WORDS\n" +
+"##################################################################################\n\n" +
+
+"Build impossible visuals.\n" +
+"Push HaxeFlixel beyond normal limits.\n" +
+"Create chaos.\n" +
+"Create style.\n" +
+"Create STRIDENT CRISIS.\n\n" +
+
+"System Status:\n" +
+"[VISUAL CORE ACTIVE]\n" +
+"[SHADER ENGINE READY]\n" +
+"[GENERATOR ONLINE]\n";
+
+        File.saveContent(readmePath, readmeContent);
+    }
+    #end
+}
 
     override public function update(elapsed:Float):Void
     {
