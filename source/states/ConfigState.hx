@@ -36,7 +36,9 @@ class ConfigState extends FlxState
         super.create();
 createReadme();
         #if sys
-            var crashLog:String =
+            var errorMsg:String = e.error != null ? Std.string(e.error) : "Unknown Crash";
+        
+            var crashLog:String =i
                         "Crash Report\n" +
                         "====================\n" +
                         "Error: " + errorMsg + "\n" +
