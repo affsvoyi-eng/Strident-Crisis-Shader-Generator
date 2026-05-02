@@ -49,7 +49,7 @@ var uiVisible:Bool = true;
 var uiElements:Array<Dynamic> = [];  
 
 var defaultImage:String = "assets/images/bg/cheeseburger.png";  
-var currentVersion:String = "0.0.7";  
+var currentVersion:String = "0.0.8 commit ";  
 
 override public function create():Void  
 {  
@@ -95,13 +95,6 @@ override public function create():Void
     add(exitBtn);  
     uiElements.push(exitBtn);  
     
-    var bloomBtn = new FlxButton(FlxG.width - 100, FlxG.height - 80, "Enter In BloomState", function()  
-    {  
-        playClick();  
-        FlxG.switchState(new BloomState());
-    });  
-    add(bloomBtn);  
-    uiElements.push(bloomBtn);  
 
     var resetBtn = new FlxButton(20, FlxG.height - 80, "Reset", function()  
     {  
