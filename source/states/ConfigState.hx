@@ -38,7 +38,7 @@ createReadme();
         #if sys
             var errorMsg:String = e.error != null ? Std.string(e.error) : "Unknown Crash";
         
-            var crashLog:String =i
+            var crashLog:String =
                         "Crash Report\n" +
                         "====================\n" +
                         "Error: " + errorMsg + "\n" +
