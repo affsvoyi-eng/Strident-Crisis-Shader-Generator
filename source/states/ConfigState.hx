@@ -36,21 +36,6 @@ class ConfigState extends FlxState
         super.create();
 createReadme();
         #if sys
-            var errorMsg:String = e.error != null ? Std.string(e.error) : "Unknown Crash";
-        
-            var crashLog:String =
-                        "Crash Report\n" +
-                        "====================\n" +
-                        "Error: " + errorMsg + "\n" +
-                        "State: ConfigState\n";
-
-                    File.saveContent(
-                        "assets/crash/crash_" + Date.now().getTime() + ".txt",
-                        crashLog
-                    );
-        #end
-        
-        #if sys
         if (!FileSystem.exists("assets/crash"))
             FileSystem.createDirectory("assets/crash");
         #end
