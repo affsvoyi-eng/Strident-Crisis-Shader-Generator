@@ -116,8 +116,9 @@ jobs:
             C:\Users\runneradmin\haxelib
             C:\Users\runneradmin\.lime
             export
-          key: windows-${{ runner.os }}-${{ hashFiles('**/Project.xml') }}
+          key: windows-${{ runner.os }}-haxe4.2.5-${{ hashFiles('**/Project.xml', '**/*.hxml', '**/haxelib.json') }}
           restore-keys: |
+            windows-${{ runner.os }}-haxe4.2.5-
             windows-${{ runner.os }}-
 
       - name: Install Libraries
@@ -134,11 +135,6 @@ jobs:
         shell: powershell
         run: |
           haxelib run lime setup
-
-      - name: Rebuild HXCPP
-        shell: powershell
-        run: |
-          haxelib run hxcpp setup
 
       - name: Build Windows
         shell: powershell
