@@ -101,13 +101,10 @@ jobs:
             export
           key: windows-${{ runner.os }}-${{ hashFiles('**/Project.xml') }}
 
-      - name: setup haxelib working repository
-        run: |
-          haxelib setup ~/haxelib
-
       - name: Install Libraries
         shell: bash
         run: |
+          haxelib setup ~/haxelib
           haxelib install lime --quiet
           haxelib install openfl --quiet
           haxelib install flixel --quiet
