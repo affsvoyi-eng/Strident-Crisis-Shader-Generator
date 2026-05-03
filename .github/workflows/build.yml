@@ -32,10 +32,13 @@ jobs:
         with:
           path: |
             ~/haxelib
-            export
+            ~/.lime
             ~/.gradle/caches
             ~/.android/build-cache
+            export
           key: android-${{ runner.os }}-${{ hashFiles('**/Project.xml') }}
+          restore-keys: |
+            android-${{ runner.os }}-
 
       - name: Install Android Dependencies
         run: |
@@ -48,9 +51,13 @@ jobs:
             "ndk;21.4.7075529" \
             "cmake;3.18.1"
 
+      - name: Setup Haxelib
+        run: |
+          mkdir -p ~/haxelib
+          haxelib setup ~/haxelib
+
       - name: Install Libraries
         run: |
-          haxelib setup ~/haxelib
           haxelib install lime --quiet
           haxelib install openfl --quiet
           haxelib install flixel --quiet
@@ -81,7 +88,7 @@ jobs:
           path: export/android/bin/app/build/outputs/apk/
           if-no-files-found: error
 
-  windows:
+  Windows:
     runs-on: windows-latest
 
     steps:
@@ -93,31 +100,48 @@ jobs:
         with:
           haxe-version: 4.2.5
 
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Setup Haxelib Directory
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\haxelib"
+          haxelib setup "$env:USERPROFILE\haxelib"
+
       - name: Cache Windows Build
         uses: actions/cache@v4
         with:
           path: |
-            ~/haxelib
+            C:\Users\runneradmin\haxelib
+            C:\Users\runneradmin\.lime
             export
           key: windows-${{ runner.os }}-${{ hashFiles('**/Project.xml') }}
+          restore-keys: |
+            windows-${{ runner.os }}-
 
       - name: Install Libraries
-        shell: bash
+        shell: powershell
         run: |
-          haxelib setup ~/haxelib
           haxelib install lime --quiet
           haxelib install openfl --quiet
           haxelib install flixel --quiet
           haxelib install flixel-addons --quiet
           haxelib install flixel-tools --quiet
+          haxelib install hxcpp --quiet
 
-      - name: Run Setup
-        shell: bash
+      - name: Run Lime Setup
+        shell: powershell
         run: |
           haxelib run lime setup
 
+      - name: Rebuild HXCPP
+        shell: powershell
+        run: |
+          haxelib run hxcpp setup
+
       - name: Build Windows
-        shell: bash
+        shell: powershell
         run: |
           haxelib run lime build windows
 
@@ -126,3 +150,4 @@ jobs:
         with:
           name: Strident-Crisis-Shader-generator-windows
           path: export/windows/bin/
+          if-no-files-found: error
