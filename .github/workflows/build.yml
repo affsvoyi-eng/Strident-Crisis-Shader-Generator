@@ -117,9 +117,6 @@ jobs:
             C:\Users\runneradmin\.lime
             export
           key: windows-${{ runner.os }}-haxe4.2.5-${{ hashFiles('**/Project.xml', '**/*.hxml', '**/haxelib.json') }}
-          restore-keys: |
-            windows-${{ runner.os }}-haxe4.2.5-
-            windows-${{ runner.os }}-
 
       - name: Install Libraries
         shell: powershell
