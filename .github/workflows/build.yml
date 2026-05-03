@@ -27,6 +27,11 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Setup Haxelib
+        run: |
+          mkdir -p ~/haxelib
+          haxelib setup ~/haxelib
+
       - name: Cache Android Build
         uses: actions/cache@v4
         with:
@@ -51,11 +56,6 @@ jobs:
             "ndk;21.4.7075529" \
             "cmake;3.18.1"
 
-      - name: Setup Haxelib
-        run: |
-          mkdir -p ~/haxelib
-          haxelib setup ~/haxelib
-
       - name: Install Libraries
         run: |
           haxelib install lime --quiet
@@ -65,7 +65,7 @@ jobs:
           haxelib install flixel-addons --quiet
           haxelib install hxcpp --quiet
 
-      - name: Run Setup
+      - name: Run Lime Setup
         shell: bash
         run: |
           haxelib run lime setup
@@ -73,11 +73,11 @@ jobs:
       - name: Configure Android
         run: |
           haxelib run lime config ANDROID_SDK $ANDROID_SDK_ROOT
-          haxelib run lime config ANDROID_NDK_ROOT /usr/local/lib/android/sdk/ndk/21.4.7075529
+          haxelib run lime config ANDROID_NDK_ROOT "$ANDROID_SDK_ROOT/ndk/21.4.7075529"
           haxelib run lime config JAVA_HOME $JAVA_HOME
           haxelib run lime config ANDROID_SETUP true
 
-      - name: Compile Android
+      - name: Build Android
         run: |
           haxelib run lime build android
 
@@ -103,7 +103,7 @@ jobs:
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Setup Haxelib Directory
+      - name: Setup Haxelib
         shell: powershell
         run: |
           New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\haxelib"
@@ -111,11 +111,13 @@ jobs:
 
       - name: Cache Windows Build
         uses: actions/cache@v4
-          with:
+        with:
           path: |
-            C:\Users\runneradmin\haxelib
+            ${{ env.USERPROFILE }}\haxelib
             export
-          key: windows-${{ runner.os }}-build
+          key: windows-${{ runner.os }}-${{ hashFiles('**/Project.xml') }}
+          restore-keys: |
+            windows-${{ runner.os }}-
 
       - name: Install Libraries
         shell: powershell
