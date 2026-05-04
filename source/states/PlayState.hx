@@ -63,6 +63,7 @@ override public function create():Void
     fitImageToScreen();  
     add(bg);  
 
+    shader = new WiggleEffect();
     shader.uTime.value = [0.0];  
     shader.uSpeed.value = [speed];  
     shader.uFrequency.value = [frequency];  
