@@ -49,7 +49,7 @@ var uiVisible:Bool = true;
 var uiElements:Array<Dynamic> = [];  
 
 var defaultImage:String = "assets/images/bg/cheeseburger.png";  
-var currentVersion:String = "0.0.8";  
+var currentVersion:String = "0.0.9";  
 
 override public function create():Void  
 {  
@@ -91,6 +91,14 @@ override public function create():Void
     {  
         playClick();  
         closeGame();  
+    });  
+    add(exitBtn);  
+    uiElements.push(exitBtn);  
+
+    var ReConfigBtn = new FlxButton(FlxG.width - 100, 95, "Config", function()  
+    {  
+        playClick();  
+        FlxG.switchState(new ReConfigState());
     });  
     add(exitBtn);  
     uiElements.push(exitBtn);  
