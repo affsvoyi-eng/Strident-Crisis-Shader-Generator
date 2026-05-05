@@ -96,13 +96,13 @@ override public function create():Void
     add(exitBtn);  
     uiElements.push(exitBtn);  
 
-    var ReConfigBtn = new FlxButton(FlxG.width - 100, 95, "Config", function()  
+    var reconfigBtn = new FlxButton(FlxG.width - 100, 95, "Config", function()  
     {  
         playClick();  
         FlxG.switchState(new ReConfigState());
     });  
-    add(exitBtn);  
-    uiElements.push(exitBtn);  
+    add(reconfigBtn);  
+    uiElements.push(reconfigBtn);  
     
 
     var resetBtn = new FlxButton(20, FlxG.height - 80, "Reset", function()  
