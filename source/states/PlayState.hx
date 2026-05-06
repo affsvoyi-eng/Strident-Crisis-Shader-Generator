@@ -338,6 +338,17 @@ function onFileSelected(e:Event):Void
     fileRef.addEventListener(Event.COMPLETE, onFileLoaded);  
     fileRef.load();  
 }  
+  function loadSettings():Void
+ {
+    if (FlxG.save.data.waveAmplitude != null)
+        waveAmplitude = FlxG.save.data.waveAmplitude;
+
+    if (FlxG.save.data.frequency != null)
+        frequency = FlxG.save.data.frequency;
+
+    if (FlxG.save.data.speed != null)
+        speed = FlxG.save.data.speed;
+    }
 
 function onFileLoaded(e:Event):Void  
 {  
