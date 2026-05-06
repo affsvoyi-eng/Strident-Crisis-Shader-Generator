@@ -235,35 +235,18 @@ function loadSettings():Void
 
     function saveSettings():Void
     {
-        var content:String =
-            "waveAmplitude=" + waveAmplitude + "\n" +
-            "frequency=" + frequency + "\n" +
-            "speed=" + speed + "\n" +
-            "uiVisible=" + uiVisible;
-
-        #if mobile
         FlxG.save.data.waveAmplitude = waveAmplitude;
         FlxG.save.data.frequency = frequency;
         FlxG.save.data.speed = speed;
-        FlxG.save.data.uiVisible = uiVisible;
         FlxG.save.flush();
-
-        #elseif sys
-        File.saveContent("assets/data/settings.txt", content);
-        #end
     }
 
     function completeSetup():Void
     {
         saveSettings();
 
-        #if mobile
         FlxG.save.data.configured = true;
         FlxG.save.flush();
-
-        #elseif sys
-        File.saveContent("assets/data/firstboot.txt", "configured=true");
-        #end
 
         FlxG.switchState(new PlayState());
     }
