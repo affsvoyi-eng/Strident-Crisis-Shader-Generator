@@ -6,7 +6,8 @@ A standalone tool made in **Haxe** that makes creating stunning wavy distortion 
 
 ![Banner](art/iconOG.png)
 
-<img src="/art/waving.gif" width="600" alt="the waving Effect">
+## Preview
+<img src="/art/waving.gif" width="1280" alt="the waving Effect">
 
 ## ✨ Features
 
