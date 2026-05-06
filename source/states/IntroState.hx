@@ -37,5 +37,4 @@ class IntroState extends FlxState
         {
             FlxG.switchState(new ConfigState());
         }
-    }
 }
