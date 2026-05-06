@@ -29,12 +29,12 @@ class IntroState extends FlxState
         }
     }
 
-        if (configured)
-        {
-            FlxG.switchState(new PlayState());
-        }
-        else
-        {
-            FlxG.switchState(new ConfigState());
-        }
+        if (FlxG.save.data.configured == true)
+{
+    FlxG.switchState(new PlayState());
+}
+else
+{
+    FlxG.switchState(new ConfigState());
+}
 }
