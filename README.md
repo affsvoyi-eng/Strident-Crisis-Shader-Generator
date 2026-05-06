@@ -1,27 +1,31 @@
 # Strident Crisis Shader Generator
 
-**A powerful wave generator for Friday Night Funkin' (FNF).**
+**A powerful wave shader generator for Friday Night Funkin' (FNF) and Videos.**
 
-A standalone tool made in **Haxe** that makes creating stunning wavy distortion shaders fast and for **Videos**
+A standalone tool made in **Haxe** that makes creating stunning wavy distortion shaders fast and easy — perfect for both FNF mods and video projects.
 
-![Banner](art/iconOG.png) <!-- Replace with your banner/screenshot path -->
+![Banner](art/iconOG.png)
+
+![Wave Shader Preview](art/waving.gif)
 
 ## ✨ Features
 
 - Real-time wave shader generation
 - Intuitive and clean user interface
 - Live preview of effects
-- Export ready-to-use shaders for Psych Engine
+- Export ready-to-use shaders
 - Multiple layers and advanced customization
 - Fast and lightweight
 
 ## 🎮 What is it for?
 
-This tool was created to help FNF modders easily create high-quality visual effects such as:
+This tool was created to help creators easily generate high-quality visual effects such as:
 - Background waves
 - Dynamic distortions
-- Water, heat haze, glitch wave, and many other effects
+- Water, heat haze, glitch waves, and many other effects
 - Procedural animated shaders
+
+Ideal for **Friday Night Funkin'** modding (Psych Engine) and general **video editing / motion graphics**.
 
 ## 📥 Download
 
@@ -37,7 +41,7 @@ Download the latest version from the **[Releases](https://github.com/affsvoyo/St
 
 ## 🏗️ Building from Source
 
-The project is built with **Haxe** + **Lime + OpenFL + Flixel-ui and Flixel-addons**.
+The project is built with **Haxe** + **Lime + OpenFL + Flixel + flixel-ui + flixel-addons**.
 
 ```bash
 # Clone the repository
