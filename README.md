@@ -1,8 +1,8 @@
 # Strident Crisis Shader Generator
 
-**A powerful wave shader generator for Friday Night Funkin' (FNF).**
+**A powerful wave generator for Friday Night Funkin' (FNF).**
 
-A standalone tool made in **Haxe** that makes creating stunning wavy distortion shaders fast and easy for FNF mods.
+A standalone tool made in **Haxe** that makes creating stunning wavy distortion shaders fast and for **Videos**
 
 ![Banner](art/iconOG.png) <!-- Replace with your banner/screenshot path -->
 
