@@ -37,7 +37,7 @@ Download the latest version from the **[Releases](https://github.com/affsvoyo/St
 
 ## 🏗️ Building from Source
 
-The project is built with **Haxe** + **Lime / OpenFL**.
+The project is built with **Haxe** + **Lime + OpenFL + Flixel-ui and Flixel-addons**.
 
 ```bash
 # Clone the repository
