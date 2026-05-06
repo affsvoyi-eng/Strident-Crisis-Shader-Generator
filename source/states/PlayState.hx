@@ -283,41 +283,33 @@ function closeGame():Void
     #if desktop  
     var window:Window = Application.current.window;  
 
+    var startY:Float = window.y;
+
+    
     FlxTween.tween(window, {  
-        width: 100,  
-        height: 60  
-    }, 0.4, {  
-        ease: FlxEase.quadIn,  
+        y: startY - 20  
+    }, 0.15, {  
+        ease: FlxEase.quadOut,  
         onComplete: function(_)  
         {  
-            #if sys  
-            Sys.exit(0);  
-            #else  
-            Lib.close();  
-            #end  
+            FlxTween.tween(window, {  
+                y: startY + 400  
+            }, 0.4, {  
+                ease: FlxEase.quadIn,  
+                onComplete: function(_)  
+                {  
+                    #if sys  
+                    Sys.exit(0);  
+                    #else  
+                    Lib.close();  
+                    #end  
+                }  
+            });  
         }  
     });  
     #end  
-}  
-
-function loadSettings():Void
-{
-    if (FlxG.save.data.waveAmplitude != null)
-    {
-        waveAmplitude = FlxG.save.data.waveAmplitude;
-    }
-
-    if (FlxG.save.data.frequency != null)
-    {
-        frequency = FlxG.save.data.frequency;
-    }
-
-    if (FlxG.save.data.speed != null)
-    {
-        speed = FlxG.save.data.speed;
-    }
 }
-
+    
 function fitImageToScreen():Void  
 {  
     if (bg == null || bg.graphic == null) return;  
