@@ -300,31 +300,23 @@ function closeGame():Void
     #end  
 }  
 
-function loadSettings():Void  
-{  
-    var path = "assets/data/settings.txt";  
+function loadSettings():Void
+{
+    if (FlxG.save.data.waveAmplitude != null)
+    {
+        waveAmplitude = FlxG.save.data.waveAmplitude;
+    }
 
-    #if sys  
-    if (!FileSystem.exists(path))  
-        return;  
+    if (FlxG.save.data.frequency != null)
+    {
+        frequency = FlxG.save.data.frequency;
+    }
 
-    var lines = File.getContent(path).split("\n");  
-
-    for (line in lines)  
-    {  
-        var parts = line.split("=");  
-
-        if (parts.length < 2) continue;  
-
-        switch(parts[0])  
-        {  
-            case "waveAmplitude": waveAmplitude = Std.parseFloat(parts[1]);  
-            case "frequency": frequency = Std.parseFloat(parts[1]);  
-            case "speed": speed = Std.parseFloat(parts[1]);  
-        }  
-    }  
-    #end  
-}  
+    if (FlxG.save.data.speed != null)
+    {
+        speed = FlxG.save.data.speed;
+    }
+}
 
 function fitImageToScreen():Void  
 {  
