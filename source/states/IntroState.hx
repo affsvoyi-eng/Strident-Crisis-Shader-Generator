@@ -16,9 +16,7 @@ class IntroState extends FlxState
 
     function decideNextState():Void
     {
-        var configured:Bool = FlxG.save.data.configured != null && FlxG.save.data.configured == true;
-
-        if (configured)
+        if (FlxG.save.data.configured == true)
         {
             FlxG.switchState(new PlayState());
         }
