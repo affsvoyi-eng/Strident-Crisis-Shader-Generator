@@ -42,6 +42,7 @@ class ReConfigState extends FlxState
     override public function create():Void
     {
         super.create();
+        loadSettings();
 
         createReadme();
 
@@ -87,7 +88,18 @@ class ReConfigState extends FlxState
         // POPUP BETA
         createBetaPopup();
     }
+    
+function loadSettings():Void
+{
+    if (FlxG.save.data.waveAmplitude != null)
+        waveAmplitude = FlxG.save.data.waveAmplitude;
 
+    if (FlxG.save.data.frequency != null)
+        frequency = FlxG.save.data.frequency;
+
+    if (FlxG.save.data.speed != null)
+        speed = FlxG.save.data.speed;
+}
     // =========================
     // POPUP
     // =========================
