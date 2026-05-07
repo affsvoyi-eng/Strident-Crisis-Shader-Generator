@@ -88,9 +88,7 @@ var loadBtn = new FlxButton(20, 20, "Add Image", function()
 {    
     playClick();    
     loadImage();
-    #if mobile
-    requestStoragePermission();
-    #end
+    
 });    
 add(loadBtn);    
 uiElements.push(loadBtn);    
@@ -320,9 +318,12 @@ bg.screenCenter();
 
 function loadImage():Void
 {
-fileRef = new FileReference();
-fileRef.addEventListener(Event.SELECT, onFileSelected);
-fileRef.browse([new FileFilter("Images", ".png;.jpg;*.jpeg")]);
+    fileRef = new FileReference();
+    fileRef.addEventListener(Event.SELECT, onFileSelected);
+
+    fileRef.browse([
+        new FileFilter("Images", "*.png;*.jpg;*.jpeg")
+    ]);
 }
 
 function onFileSelected(e:Event):Void
@@ -330,6 +331,7 @@ function onFileSelected(e:Event):Void
 fileRef.addEventListener(Event.COMPLETE, onFileLoaded);
 fileRef.load();
 }
+    
 function loadSettings():Void
 {
 if (FlxG.save.data.waveAmplitude != null)
@@ -340,27 +342,6 @@ if (FlxG.save.data.frequency != null)
 
 if (FlxG.save.data.speed != null)  
     speed = FlxG.save.data.speed;  
-}
-
-function requestStoragePermission():Void
-{
-    #if android
-    var request = new PermissionRequest();
-    
-    request.permissions = [
-        "android.permission.READ_EXTERNAL_STORAGE"
-    ];
-
-    request.onComplete = function(granted:Bool)
-    {
-        if (!granted)
-            trace("Storage permission denied");
-        else
-            trace("Storage permission granted");
-    };
-
-    request.request();
-    #end
 }
 
 function onFileLoaded(e:Event):Void
