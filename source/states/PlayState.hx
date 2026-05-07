@@ -22,6 +22,10 @@ import lime.ui.Window;
 import shader.Shaders;
 import states.ReConfigState;
 
+#if mobile
+import lime.system.JNI;
+#end
+
 #if sys
 import sys.io.File;
 import sys.FileSystem;
@@ -83,7 +87,10 @@ uiElements.push(versionText);
 var loadBtn = new FlxButton(20, 20, "Add Image", function()    
 {    
     playClick();    
-    loadImage();    
+    loadImage();
+    #if mobile
+    requestStoragePermission();
+    #end
 });    
 add(loadBtn);    
 uiElements.push(loadBtn);    
@@ -333,6 +340,42 @@ if (FlxG.save.data.frequency != null)
 
 if (FlxG.save.data.speed != null)  
     speed = FlxG.save.data.speed;  
+}
+
+function requestStoragePermission():Void
+{
+    #if android
+    try
+    {
+        var activity = lime.app.Application.current.window.context;
+
+        var checkSelfPermission = JNI.createStaticMethod(
+            "androidx.core.content.ContextCompat",
+            "checkSelfPermission",
+            "(Landroid/content/Context;Ljava/lang/String;)I"
+        );
+
+        var requestPermissions = JNI.createStaticMethod(
+            "androidx.core.app.ActivityCompat",
+            "requestPermissions",
+            "(Landroid/app/Activity;[Ljava/lang/String;I)V"
+        );
+
+        var permission = "android.permission.READ_EXTERNAL_STORAGE";
+
+        var granted:Int = checkSelfPermission(activity, permission);
+
+        if (granted != 0)
+        {
+            var perms = java.NativeArray.make(permission);
+            requestPermissions(activity, perms, 1);
+        }
+    }
+    catch (e:Dynamic)
+    {
+        trace("Permission error: " + e);
+    }
+    #end
 }
 
 function onFileLoaded(e:Event):Void
