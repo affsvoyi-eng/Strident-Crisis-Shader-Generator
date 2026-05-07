@@ -21,7 +21,7 @@ import openfl.Lib;
 import lime.app.Application;
 import lime.ui.Window;
 
-import shader.WiggleEffect;
+import shader.Shaders.WiggleEffect;
 import states.ReConfigState;
 
 #if sys
