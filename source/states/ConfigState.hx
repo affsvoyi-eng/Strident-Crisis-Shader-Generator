@@ -13,11 +13,6 @@ import openfl.utils.Assets;
 import states.PlayState;
 import shader.Shaders;
 
-#if sys
-import sys.io.File;
-import sys.FileSystem;
-#end
-
 class ConfigState extends FlxState
 {
     var bg:FlxSprite;
@@ -43,11 +38,6 @@ class ConfigState extends FlxState
         super.create();
 
         createReadme();
-
-        #if sys
-        if (!FileSystem.exists("assets/crash"))
-            FileSystem.createDirectory("assets/crash");
-        #end
 
         initCrashHandler();
 
@@ -211,32 +201,7 @@ class ConfigState extends FlxState
 
     function initCrashHandler():Void
     {
-        Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(
-            UncaughtErrorEvent.UNCAUGHT_ERROR,
-            function(e:UncaughtErrorEvent):Void
-            {
-                var errorMsg:String = e.error != null ? Std.string(e.error) : "Unknown Crash";
-
-                #if sys
-                try
-                {
-                    if (!FileSystem.exists("assets/crash"))
-                        FileSystem.createDirectory("assets/crash");
-
-                    var crashLog:String =
-                        "Crash Report\n====================\n" +
-                        "Error: " + errorMsg + "\n" +
-                        "State: ConfigState\n";
-
-                    File.saveContent(
-                        "assets/crash/crash_" + Date.now().getTime() + ".txt",
-                        crashLog
-                    );
-                }
-                catch (saveError:Dynamic) {}
-                #end
-            }
-        );
+        
     }
 
     // =========================
@@ -282,15 +247,7 @@ class ConfigState extends FlxState
 
     function createReadme():Void
     {
-        #if sys
-        var readmePath:String = "do NOT readme.txt";
-
-        if (!FileSystem.exists(readmePath))
-        {
-            var readmeContent:String = "STRIDENT CRISIS SHADER GENERATOR...\n(omitted for brevity)";
-            File.saveContent(readmePath, readmeContent);
-        }
-        #end
+        
     }
 
     override public function update(elapsed:Float):Void
