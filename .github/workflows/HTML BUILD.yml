@@ -1,0 +1,60 @@
+name: HTML Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  HTML:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Haxe
+        uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.2.5
+
+      - name: Setup Haxelib
+        run: |
+          mkdir -p ~/haxelib
+          haxelib setup ~/haxelib
+
+      - name: Cache HTML Build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/haxelib
+            ~/.lime
+            export
+          key: html-${{ runner.os }}-${{ hashFiles('**/Project.xml', '**/*.hxml', '**/haxelib.json') }}
+          restore-keys: |
+            html-${{ runner.os }}-
+
+      - name: Install Libraries
+        run: |
+          haxelib install lime --quiet
+          haxelib install openfl --quiet
+          haxelib install flixel --quiet
+          haxelib install flixel-tools --quiet
+          haxelib install flixel-addons --quiet
+          haxelib install flixel-ui --quiet
+
+      - name: Run Lime Setup
+        run: |
+          haxelib run lime setup
+
+      - name: Build HTML5
+        run: |
+          haxelib run lime build html5
+
+      - name: Upload HTML Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Strident-Crisis-Shader-generator-html
+          path: export/html5/bin/
+          if-no-files-found: error
+          retention-days: 1
