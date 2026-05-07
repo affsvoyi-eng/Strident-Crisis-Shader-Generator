@@ -8,11 +8,9 @@ import flixel.ui.FlxButton;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 
-import flixel.addons.ui.FlxUITabMenu;
-import flixel.addons.ui.FlxUIGroup;
-
 import openfl.net.FileReference;
 import openfl.events.Event;
+import openfl.events.UncaughtErrorEvent;
 import openfl.net.FileFilter;
 import openfl.display.Loader;
 import openfl.display.Bitmap;
@@ -21,7 +19,7 @@ import openfl.Lib;
 import lime.app.Application;
 import lime.ui.Window;
 
-import shader.Shaders.WiggleEffect;
+import shader.Shaders;
 import states.ReConfigState;
 
 #if sys
@@ -31,231 +29,347 @@ import sys.FileSystem;
 
 class PlayState extends FlxState
 {
-    var bg:FlxSprite;
-    var shader:WiggleEffect;
-    var fileRef:FileReference;
+var bg:FlxSprite;
+var shader:WiggleEffect;
+var fileRef:FileReference;
 
-    var ampText:FlxText;
-    var freqText:FlxText;
-    var speedText:FlxText;
-    var brightText:FlxText;
-    var timeText:FlxText;
-    var versionText:FlxText;
-    var toggleText:FlxText;
+var ampText:FlxText;
+var freqText:FlxText;
+var speedText:FlxText;
+var timeText:FlxText;
+var versionText:FlxText;
 
-    var waveAmplitude:Float = 0.1;
-    var frequency:Float = 5.0;
-    var speed:Float = 2.0;
-    var brightness:Float = 1.0;
+var waveAmplitude:Float = 0.1;
+var frequency:Float = 5.0;
+var speed:Float = 2.0;
+var brightness:Float = 1.0;
 
-    var brightnessOverlay:FlxSprite;
+var brightnessOverlay:FlxSprite;
 
-    var tabMenu:FlxUITabMenu;
-    var uiVisible:Bool = true;
+var uiVisible:Bool = true;
+var uiElements:Array<Dynamic> = [];
 
-    var defaultImage:String = "assets/images/bg/cheeseburger.png";
-    var currentVersion:String = "0.1.0";
+var defaultImage:String = "assets/images/bg/cheeseburger.png";
+var currentVersion:String = "0.1.0";
 
-    override public function create():Void
-    {
-        super.create();
+override public function create():Void
+{
+super.create();
 
-        loadSettings();
+initCrashHandler();    
+loadSettings();    
 
-        bg = new FlxSprite();
-        bg.loadGraphic(defaultImage);
-        fitImageToScreen();
-        add(bg);
+bg = new FlxSprite();    
+bg.loadGraphic(defaultImage);    
+fitImageToScreen();    
+add(bg);    
 
-        shader = new WiggleEffect();
-        shader.uTime.value = [0.0];
-        shader.uSpeed.value = [speed];
-        shader.uFrequency.value = [frequency];
-        shader.uWaveAmplitude.value = [waveAmplitude];
+shader = new WiggleEffect();  
+shader.uTime.value = [0.0];    
+shader.uSpeed.value = [speed];    
+shader.uFrequency.value = [frequency];    
+shader.uWaveAmplitude.value = [waveAmplitude];    
 
-        bg.shader = shader;
+bg.shader = shader;    
 
-        brightnessOverlay = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF000000);
-        brightnessOverlay.scrollFactor.set();
-        add(brightnessOverlay);
+brightnessOverlay = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF000000);    
+brightnessOverlay.scrollFactor.set();    
+add(brightnessOverlay);    
 
-        versionText = new FlxText(20, FlxG.height - 50, 500, "Version: " + currentVersion);
-        add(versionText);
+versionText = new FlxText(20, FlxG.height - 50, 500, "Version: " + currentVersion);    
+add(versionText);    
+uiElements.push(versionText);    
 
-        timeText = new FlxText(20, 410, 400, "Time: 0");
-        add(timeText);
+var loadBtn = new FlxButton(20, 20, "Add Image", function()    
+{    
+    playClick();    
+    loadImage();    
+});    
+add(loadBtn);    
+uiElements.push(loadBtn);    
 
-        toggleText = new FlxText(20, FlxG.height - 30, 500, "Press SPACE to toggle UI");
-        add(toggleText);
+var exitBtn = new FlxButton(FlxG.width - 100, 20, "Exit", function()    
+{    
+    playClick();    
+    closeGame();    
+});    
+add(exitBtn);    
+uiElements.push(exitBtn);    
 
-        createTabMenu();
-        add(tabMenu);
+var reconfigBtn = new FlxButton(FlxG.width - 100, 95, "Config", function()    
+{    
+    playClick();    
+    FlxG.switchState(new ReConfigState());  
+});    
+add(reconfigBtn);    
+uiElements.push(reconfigBtn);    
+  
 
-        updateBrightness();
-    }
+var resetBtn = new FlxButton(20, FlxG.height - 80, "Reset", function()    
+{    
+    playClick();    
+    resetDefaults();    
+});    
+add(resetBtn);    
+uiElements.push(resetBtn);    
 
-    function createTabMenu():Void
-    {
-        // -------- WIGGLE TAB --------
-        var wiggleGroup = new FlxUIGroup();
-        wiggleGroup.name = "Wiggle";
+ampText = new FlxText(20, 70, 400, "Wave Amplitude: " + waveAmplitude);    
+add(ampText);    
+uiElements.push(ampText);    
 
-        ampText = new FlxText(10, 10, 380, "Wave Amplitude: " + waveAmplitude);
-        wiggleGroup.add(ampText);
+var ampMinus = new FlxButton(20, 95, "-", function()    
+{    
+    waveAmplitude = Math.max(0, waveAmplitude - 0.005);    
+    updateShaderValues();    
+});    
+add(ampMinus);    
+uiElements.push(ampMinus);    
 
-        freqText = new FlxText(10, 80, 380, "Frequency: " + frequency);
-        wiggleGroup.add(freqText);
+var ampPlus = new FlxButton(120, 95, "+", function()    
+{    
+    waveAmplitude += 0.005;    
+    updateShaderValues();    
+});    
+add(ampPlus);    
+uiElements.push(ampPlus);    
 
-        speedText = new FlxText(10, 150, 380, "Speed: " + speed);
-        wiggleGroup.add(speedText);
+freqText = new FlxText(20, 140, 400, "Frequency: " + frequency);    
+add(freqText);    
+uiElements.push(freqText);    
 
-        // -------- BRIGHTNESS TAB --------
-        var brightnessGroup = new FlxUIGroup();
-        brightnessGroup.name = "Brightness";
+var freqMinus = new FlxButton(20, 165, "-", function()    
+{    
+    frequency = Math.max(1, frequency - 1);    
+    updateShaderValues();    
+});    
+add(freqMinus);    
+uiElements.push(freqMinus);    
 
-        brightText = new FlxText(10, 10, 380, "Brightness: " + brightness);
-        brightnessGroup.add(brightText);
+var freqPlus = new FlxButton(120, 165, "+", function()    
+{    
+    frequency += 1;    
+    updateShaderValues();    
+});    
+add(freqPlus);    
+uiElements.push(freqPlus);    
 
-        var actionsGroup = new FlxUIGroup();
-        actionsGroup.name = "Actions";
+speedText = new FlxText(20, 210, 400, "Speed: " + speed);    
+add(speedText);    
+uiElements.push(speedText);    
 
-        var loadBtn = new FlxButton(10, 10, "Add Image", function() loadImage());
-        actionsGroup.add(loadBtn);
+var speedMinus = new FlxButton(20, 235, "-", function()    
+{    
+    speed = Math.max(0.1, speed - 0.1);    
+    updateShaderValues();    
+});    
+add(speedMinus);    
+uiElements.push(speedMinus);    
 
-        var resetBtn = new FlxButton(10, 50, "Reset", function() resetDefaults());
-        actionsGroup.add(resetBtn);
+var speedPlus = new FlxButton(120, 235, "+", function()    
+{    
+    speed += 0.1;    
+    updateShaderValues();    
+});    
+add(speedPlus);    
+uiElements.push(speedPlus);    
 
-        var configBtn = new FlxButton(10, 90, "Config", function()
-        {
-            FlxG.switchState(new ReConfigState());
-        });
-        actionsGroup.add(configBtn);
+var brightMinus = new FlxButton(20, 300, "-", function()    
+{    
+    brightness = Math.max(0, brightness - 0.1);    
+    updateBrightness();    
+});    
+add(brightMinus);    
+uiElements.push(brightMinus);    
 
-        var exitBtn = new FlxButton(10, 130, "Exit", function() closeGame());
-        actionsGroup.add(exitBtn);
+var brightPlus = new FlxButton(120, 300, "+", function()    
+{    
+    brightness = Math.min(1, brightness + 0.1);    
+    updateBrightness();    
+});    
+add(brightPlus);    
+uiElements.push(brightPlus);    
 
-        // -------- FIX DO TAB MENU --------
-        var tabs = [
-            { name: "wiggle", label: "Wiggle", content: wiggleGroup },
-            { name: "brightness", label: "Brightness", content: brightnessGroup },
-            { name: "actions", label: "Actions", content: actionsGroup }
-        ];
+timeText = new FlxText(20, 330, 400, "Time: 0");    
+add(timeText);    
+uiElements.push(timeText);    
 
-        tabMenu = new FlxUITabMenu(null, tabs, true);
-        tabMenu.resize(400, 300);
-        tabMenu.x = 20;
-        tabMenu.y = 20;
-    }
+var toggleText = new FlxText(20, FlxG.height - 30, 500, "Press SPACE to toggle UI");    
+add(toggleText);    
+uiElements.push(toggleText);    
 
-    override public function update(elapsed:Float):Void
-    {
-        super.update(elapsed);
+updateBrightness();
 
-        shader.uTime.value[0] += elapsed;
+}
 
-        timeText.text = "Time: " + Std.string(Std.int(shader.uTime.value[0] * 100) / 100);
+function initCrashHandler():Void
+{
+Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(
+UncaughtErrorEvent.UNCAUGHT_ERROR,
+function(e:UncaughtErrorEvent):Void
+{
+var errorMsg:String = e.error != null ? Std.string(e.error) : "Unknown Crash";
 
-        if (FlxG.keys.justPressed.SPACE)
-        {
-            uiVisible = !uiVisible;
-            tabMenu.visible = uiVisible;
-            versionText.visible = uiVisible;
-            timeText.visible = uiVisible;
-            toggleText.visible = uiVisible;
-        }
-    }
+#if sys    
+        try    
+        {    
+            if (!FileSystem.exists("crash"))    
+                FileSystem.createDirectory("crash");    
 
-    function updateBrightness():Void
-    {
-        brightnessOverlay.alpha = 1 - brightness;
-        if (brightText != null)
-            brightText.text = "Brightness: " + brightness;
-    }
+            File.saveContent(    
+                "crash/playstate_crash_" + Date.now().getTime() + ".txt",    
+                "Error: " + errorMsg    
+            );    
+        }    
+        catch (saveError:Dynamic) {}    
+        #end    
 
-    function resetDefaults():Void
-    {
-        waveAmplitude = 0.1;
-        frequency = 5;
-        speed = 2;
-        brightness = 1;
+        FlxG.log.error("CRASH DETECTED: " + errorMsg);    
+    }    
+);
 
-        updateBrightness();
-    }
+}
 
-    function loadSettings():Void
-    {
-        if (FlxG.save.data.waveAmplitude != null)
-            waveAmplitude = FlxG.save.data.waveAmplitude;
+override public function update(elapsed:Float):Void
+{
+super.update(elapsed);
 
-        if (FlxG.save.data.frequency != null)
-            frequency = FlxG.save.data.frequency;
+shader.uTime.value[0] += elapsed;    
+timeText.text = "Time: " + Std.string(Std.int(shader.uTime.value[0] * 100) / 100);    
 
-        if (FlxG.save.data.speed != null)
-            speed = FlxG.save.data.speed;
-    }
+if (FlxG.keys.justPressed.SPACE)    
+{    
+    uiVisible = !uiVisible;    
 
-    function fitImageToScreen():Void
-    {
-        if (bg == null) return;
+    for (e in uiElements)    
+    {    
+        e.visible = uiVisible;    
+        e.active = uiVisible;    
+    }    
+}
 
-        var scaleX = FlxG.width / bg.width;
-        var scaleY = FlxG.height / bg.height;
+}
 
-        var finalScale = Math.max(scaleX, scaleY);
+function resetDefaults():Void
+{
+waveAmplitude = 0.1;
+frequency = 5.0;
+speed = 2.0;
+brightness = 1.0;
 
-        bg.scale.set(finalScale, finalScale);
-        bg.updateHitbox();
-        bg.screenCenter();
-    }
+updateShaderValues();    
+updateBrightness();
 
-    function closeGame():Void
-    {
-        #if desktop
-        var window:Window = Application.current.window;
-        var startY:Float = window.y;
+}
 
-        FlxTween.tween(window, {y: startY - 20}, 0.15, {
-            ease: FlxEase.quadOut,
-            onComplete: function(_) {
-                FlxTween.tween(window, {y: startY + 400}, 0.4, {
-                    ease: FlxEase.quadIn,
-                    onComplete: function(_) {
-                        #if sys
-                        Sys.exit(0);
-                        #else
-                        Lib.close();
-                        #end
-                    }
-                });
-            }
-        });
-        #end
-    }
+function updateBrightness():Void
+{
+brightnessOverlay.alpha = 1 - brightness;
+}
 
-    function loadImage():Void
-    {
-        fileRef = new FileReference();
-        fileRef.addEventListener(Event.SELECT, function(_)
-        {
-            fileRef.addEventListener(Event.COMPLETE, onFileLoaded);
-            fileRef.load();
-        });
+function updateShaderValues():Void
+{
+shader.uWaveAmplitude.value = [waveAmplitude];
+shader.uFrequency.value = [frequency];
+shader.uSpeed.value = [speed];
 
-        fileRef.browse([new FileFilter("Images", "*.png;*.jpg;*.jpeg")]);
-    }
+ampText.text = "Wave Amplitude: " + waveAmplitude;    
+freqText.text = "Frequency: " + frequency;    
+speedText.text = "Speed: " + speed;
 
-    function onFileLoaded(e:Event):Void
-    {
-        var loader = new Loader();
+}
 
-        loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(_)
-        {
-            var bmp:Bitmap = cast loader.content;
-            bg.loadGraphic(bmp.bitmapData);
-            fitImageToScreen();
-            bg.shader = shader;
-        });
+function playClick():Void
+{
+FlxG.sound.play("assets/sounds/click.ogg");
+}
 
-        loader.loadBytes(fileRef.data);
-    }
+function closeGame():Void
+{
+#if desktop
+var window:Window = Application.current.window;
+
+var startY:Float = window.y;  
+
+  
+FlxTween.tween(window, {    
+    y: startY - 20    
+}, 0.15, {    
+    ease: FlxEase.quadOut,    
+    onComplete: function(_)    
+    {    
+        FlxTween.tween(window, {    
+            y: startY + 400    
+        }, 0.4, {    
+            ease: FlxEase.quadIn,    
+            onComplete: function(_)    
+            {    
+                #if sys    
+                Sys.exit(0);    
+                #else    
+                Lib.close();    
+                #end    
+            }    
+        });    
+    }    
+});    
+#end
+
+}
+
+function fitImageToScreen():Void
+{
+if (bg == null || bg.graphic == null) return;
+
+bg.scale.set(1, 1);    
+bg.updateHitbox();    
+
+var scaleX = FlxG.width / bg.width;    
+var scaleY = FlxG.height / bg.height;    
+var finalScale = Math.max(scaleX, scaleY);    
+
+bg.scale.set(finalScale, finalScale);    
+bg.updateHitbox();    
+bg.screenCenter();
+
+}
+
+function loadImage():Void
+{
+fileRef = new FileReference();
+fileRef.addEventListener(Event.SELECT, onFileSelected);
+fileRef.browse([new FileFilter("Images", ".png;.jpg;*.jpeg")]);
+}
+
+function onFileSelected(e:Event):Void
+{
+fileRef.addEventListener(Event.COMPLETE, onFileLoaded);
+fileRef.load();
+}
+function loadSettings():Void
+{
+if (FlxG.save.data.waveAmplitude != null)
+waveAmplitude = FlxG.save.data.waveAmplitude;
+
+if (FlxG.save.data.frequency != null)  
+    frequency = FlxG.save.data.frequency;  
+
+if (FlxG.save.data.speed != null)  
+    speed = FlxG.save.data.speed;  
+}
+
+function onFileLoaded(e:Event):Void
+{
+var loader = new Loader();
+
+loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(_)    
+{    
+    var bmp:Bitmap = cast loader.content;    
+    bg.loadGraphic(bmp.bitmapData);    
+    fitImageToScreen();    
+    bg.shader = shader;    
+});    
+
+loader.loadBytes(fileRef.data);
+
+}
 }
