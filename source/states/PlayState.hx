@@ -5,8 +5,6 @@ import flixel.FlxSprite;
 import flixel.FlxG;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
-import flixel.tweens.FlxTween;
-import flixel.tweens.FlxEase;
 
 import flixel.addons.ui.FlxUITabMenu;
 import flixel.addons.ui.FlxUIGroup;
@@ -22,8 +20,7 @@ import openfl.Lib;
 import lime.app.Application;
 import lime.ui.Window;
 
-import states.ReConfigState;
-import shader.Shaders;
+import shader.Shaders.WiggleEffect;
 
 #if sys
 import sys.io.File;
@@ -33,9 +30,15 @@ import sys.FileSystem;
 class PlayState extends FlxState
 {
     var bg:FlxSprite;
+    var shader:WiggleEffect;
+
     var fileRef:FileReference;
 
-    var shader:WiggleEffect;
+    var ampText:FlxText;
+    var freqText:FlxText;
+    var speedText:FlxText;
+    var timeText:FlxText;
+    var versionText:FlxText;
 
     var waveAmplitude:Float = 0.1;
     var frequency:Float = 5.0;
@@ -44,23 +47,15 @@ class PlayState extends FlxState
 
     var brightnessOverlay:FlxSprite;
 
+    var uiVisible:Bool = true;
+
     var tabMenu:FlxUITabMenu;
 
     var mainGroup:FlxUIGroup;
     var shaderGroup:FlxUIGroup;
-    var imageGroup:FlxUIGroup;
     var systemGroup:FlxUIGroup;
 
-    var ampText:FlxText;
-    var freqText:FlxText;
-    var speedText:FlxText;
-    var timeText:FlxText;
-    var versionText:FlxText;
-
-    var uiVisible:Bool = true;
-
     var currentVersion:String = "0.1.0";
-    var defaultImage:String = "assets/images/bg/cheeseburger.png";
 
     override public function create():Void
     {
@@ -68,10 +63,9 @@ class PlayState extends FlxState
 
         initCrashHandler();
 
-        // =====================
         // BACKGROUND
-        // =====================
-        bg = new FlxSprite().loadGraphic(defaultImage);
+        bg = new FlxSprite();
+        bg.loadGraphic("assets/images/bg/cheeseburger.png");
         add(bg);
 
         shader = new WiggleEffect();
@@ -85,53 +79,55 @@ class PlayState extends FlxState
         brightnessOverlay = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF000000);
         add(brightnessOverlay);
 
-        // =====================
-        // TAB MENU
-        // =====================
+        // ======================
+        // TAB MENU (SÓ ADIÇÃO)
+        // ======================
         tabMenu = new FlxUITabMenu(null, [
             {name: "main", label: "Main"},
             {name: "shader", label: "Shader"},
-            {name: "image", label: "Image"},
             {name: "system", label: "System"}
         ], true);
 
-        tabMenu.resize(340, 280);
+        tabMenu.resize(320, 260);
         tabMenu.x = 10;
         tabMenu.y = 10;
         add(tabMenu);
 
-        // =====================
-        // MAIN TAB
-        // =====================
+        // ======================
+        // MAIN TAB (SEUS BOTÕES)
+        // ======================
         mainGroup = new FlxUIGroup();
 
-        var quitBtn = new FlxButton(10, 10, "Quit Game", function()
+        var loadBtn = new FlxButton(10, 10, "Add Image", function()
         {
-            FlxG.exit();
+            loadImage();
         });
 
-        var settingsBtn = new FlxButton(10, 50, "Open Settings", function()
+        var exitBtn = new FlxButton(10, 50, "Exit", function()
+        {
+            closeGame();
+        });
+
+        var reconfigBtn = new FlxButton(10, 90, "Config", function()
         {
             FlxG.switchState(new ReConfigState());
         });
 
-        var resetBtn = new FlxButton(10, 90, "Reset Values", function()
+        var resetBtn = new FlxButton(10, 130, "Reset", function()
         {
-            waveAmplitude = 0.1;
-            frequency = 5.0;
-            speed = 2.0;
-            updateShader();
+            resetDefaults();
         });
 
-        mainGroup.add(quitBtn);
-        mainGroup.add(settingsBtn);
+        mainGroup.add(loadBtn);
+        mainGroup.add(exitBtn);
+        mainGroup.add(reconfigBtn);
         mainGroup.add(resetBtn);
 
-        tabMenu.addGroup(mainGroup, "main");
+        tabMenu.addGroup(mainGroup);
 
-        // =====================
-        // SHADER TAB
-        // =====================
+        // ======================
+        // SHADER TAB (SEU UI ORIGINAL)
+        // ======================
         shaderGroup = new FlxUIGroup();
 
         ampText = new FlxText(10, 10, 200, "");
@@ -142,68 +138,11 @@ class PlayState extends FlxState
         shaderGroup.add(freqText);
         shaderGroup.add(speedText);
 
-        var ampMinus = new FlxButton(10, 110, "-", function()
-        {
-            waveAmplitude -= 0.01;
-            updateShader();
-        });
+        tabMenu.addGroup(shaderGroup);
 
-        var ampPlus = new FlxButton(60, 110, "+", function()
-        {
-            waveAmplitude += 0.01;
-            updateShader();
-        });
-
-        var freqMinus = new FlxButton(10, 150, "-", function()
-        {
-            frequency -= 1;
-            updateShader();
-        });
-
-        var freqPlus = new FlxButton(60, 150, "+", function()
-        {
-            frequency += 1;
-            updateShader();
-        });
-
-        var speedMinus = new FlxButton(10, 190, "-", function()
-        {
-            speed -= 0.1;
-            updateShader();
-        });
-
-        var speedPlus = new FlxButton(60, 190, "+", function()
-        {
-            speed += 0.1;
-            updateShader();
-        });
-
-        shaderGroup.add(ampMinus);
-        shaderGroup.add(ampPlus);
-        shaderGroup.add(freqMinus);
-        shaderGroup.add(freqPlus);
-        shaderGroup.add(speedMinus);
-        shaderGroup.add(speedPlus);
-
-        tabMenu.addGroup(shaderGroup, "shader");
-
-        // =====================
-        // IMAGE TAB
-        // =====================
-        imageGroup = new FlxUIGroup();
-
-        var importBtn = new FlxButton(10, 10, "Import Image", function()
-        {
-            loadImage();
-        });
-
-        imageGroup.add(importBtn);
-
-        tabMenu.addGroup(imageGroup, "image");
-
-        // =====================
+        // ======================
         // SYSTEM TAB
-        // =====================
+        // ======================
         systemGroup = new FlxUIGroup();
 
         versionText = new FlxText(10, 10, 200, "Version: " + currentVersion);
@@ -212,9 +151,10 @@ class PlayState extends FlxState
         systemGroup.add(versionText);
         systemGroup.add(timeText);
 
-        tabMenu.addGroup(systemGroup, "system");
+        tabMenu.addGroup(systemGroup);
 
-        updateShader();
+        updateShaderValues();
+        updateBrightness();
     }
 
     override public function update(elapsed:Float):Void
@@ -228,11 +168,10 @@ class PlayState extends FlxState
         {
             uiVisible = !uiVisible;
             tabMenu.visible = uiVisible;
-            tabMenu.active = uiVisible;
         }
     }
 
-    function updateShader():Void
+    function updateShaderValues():Void
     {
         shader.uWaveAmplitude.value = [waveAmplitude];
         shader.uFrequency.value = [frequency];
@@ -243,29 +182,23 @@ class PlayState extends FlxState
         speedText.text = "Speed: " + speed;
     }
 
+    function updateBrightness():Void
+    {
+        brightnessOverlay.alpha = 1 - brightness;
+    }
+
+    function resetDefaults():Void
+    {
+        waveAmplitude = 0.1;
+        frequency = 5.0;
+        speed = 2.0;
+
+        updateShaderValues();
+    }
+
     function loadImage():Void
     {
         fileRef = new FileReference();
-
-        fileRef.addEventListener(Event.SELECT, function(_)
-        {
-            fileRef.addEventListener(Event.COMPLETE, function(_)
-            {
-                var loader = new Loader();
-
-                loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(_)
-                {
-                    var bmp:Bitmap = cast loader.content;
-                    bg.loadGraphic(bmp.bitmapData);
-                    bg.shader = shader;
-                });
-
-                loader.loadBytes(fileRef.data);
-            });
-
-            fileRef.load();
-        });
-
         fileRef.browse([new FileFilter("Images", "*.png;*.jpg;*.jpeg")]);
     }
 
@@ -273,10 +206,19 @@ class PlayState extends FlxState
     {
         Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(
             UncaughtErrorEvent.UNCAUGHT_ERROR,
-            function(e:UncaughtErrorEvent)
+            function(e)
             {
-                FlxG.log.error("Crash: " + Std.string(e.error));
+                FlxG.log.error("Crash: " + e.error);
             }
         );
+    }
+
+    function closeGame():Void
+    {
+        #if sys
+        Sys.exit(0);
+        #else
+        Lib.close();
+        #end
     }
 }
