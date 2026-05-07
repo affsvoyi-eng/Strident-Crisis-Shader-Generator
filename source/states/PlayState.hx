@@ -23,6 +23,7 @@ import lime.app.Application;
 import lime.ui.Window;
 
 import states.ReConfigState;
+import shader.Shaders;
 
 #if sys
 import sys.io.File;
