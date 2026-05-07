@@ -345,36 +345,21 @@ if (FlxG.save.data.speed != null)
 function requestStoragePermission():Void
 {
     #if android
-    try
+    var request = new PermissionRequest();
+    
+    request.permissions = [
+        "android.permission.READ_EXTERNAL_STORAGE"
+    ];
+
+    request.onComplete = function(granted:Bool)
     {
-        var activity = lime.app.Application.current.window.context;
+        if (!granted)
+            trace("Storage permission denied");
+        else
+            trace("Storage permission granted");
+    };
 
-        var checkSelfPermission = JNI.createStaticMethod(
-            "androidx.core.content.ContextCompat",
-            "checkSelfPermission",
-            "(Landroid/content/Context;Ljava/lang/String;)I"
-        );
-
-        var requestPermissions = JNI.createStaticMethod(
-            "androidx.core.app.ActivityCompat",
-            "requestPermissions",
-            "(Landroid/app/Activity;[Ljava/lang/String;I)V"
-        );
-
-        var permission = "android.permission.READ_EXTERNAL_STORAGE";
-
-        var granted:Int = checkSelfPermission(activity, permission);
-
-        if (granted != 0)
-        {
-            var perms = untyped __java__("new String[] { permission }");
-            requestPermissions(activity, perms, 1);
-        }
-    }
-    catch (e:Dynamic)
-    {
-        trace("Permission error: " + e);
-    }
+    request.request();
     #end
 }
 
