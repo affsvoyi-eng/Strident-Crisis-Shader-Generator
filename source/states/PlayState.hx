@@ -367,7 +367,7 @@ function requestStoragePermission():Void
 
         if (granted != 0)
         {
-            var perms = java.NativeArray.make(permission);
+            var perms = untyped __java__("new String[] { permission }");
             requestPermissions(activity, perms, 1);
         }
     }
