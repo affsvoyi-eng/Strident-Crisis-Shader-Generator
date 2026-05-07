@@ -55,7 +55,6 @@ class PlayState extends FlxState
     var defaultImage:String = "assets/images/bg/cheeseburger.png";
     var currentVersion:String = "0.1.0";
 
-    // TAB MENU
     var tabMenu:FlxUITabMenu;
     var mainGroup:FlxUIGroup;
     var shaderGroup:FlxUIGroup;
@@ -119,7 +118,7 @@ class PlayState extends FlxState
             closeGame();
         });
 
-        var configBtn = new FlxButton(20, 100, "Open Config", function()
+        var configBtn = new FlxButton(20, 100, "Config", function()
         {
             playClick();
             FlxG.switchState(new ReConfigState());
@@ -148,69 +147,9 @@ class PlayState extends FlxState
         speedText = new FlxText(20, 100, 400, "");
         timeText = new FlxText(20, 140, 400, "");
 
-        var ampMinus = new FlxButton(20, 180, "-", function()
-        {
-            waveAmplitude = Math.max(0, waveAmplitude - 0.005);
-            updateShaderValues();
-        });
-
-        var ampPlus = new FlxButton(80, 180, "+", function()
-        {
-            waveAmplitude += 0.005;
-            updateShaderValues();
-        });
-
-        var freqMinus = new FlxButton(20, 220, "-", function()
-        {
-            frequency = Math.max(1, frequency - 1);
-            updateShaderValues();
-        });
-
-        var freqPlus = new FlxButton(80, 220, "+", function()
-        {
-            frequency += 1;
-            updateShaderValues();
-        });
-
-        var speedMinus = new FlxButton(20, 260, "-", function()
-        {
-            speed = Math.max(0.1, speed - 0.1);
-            updateShaderValues();
-        });
-
-        var speedPlus = new FlxButton(80, 260, "+", function()
-        {
-            speed += 0.1;
-            updateShaderValues();
-        });
-
-        var brightMinus = new FlxButton(20, 300, "-", function()
-        {
-            brightness = Math.max(0, brightness - 0.1);
-            updateBrightness();
-        });
-
-        var brightPlus = new FlxButton(80, 300, "+", function()
-        {
-            brightness = Math.min(1, brightness + 0.1);
-            updateBrightness();
-        });
-
         shaderGroup.add(ampText);
-        shaderGroup.add(ampMinus);
-        shaderGroup.add(ampPlus);
-
         shaderGroup.add(freqText);
-        shaderGroup.add(freqMinus);
-        shaderGroup.add(freqPlus);
-
         shaderGroup.add(speedText);
-        shaderGroup.add(speedMinus);
-        shaderGroup.add(speedPlus);
-
-        shaderGroup.add(brightMinus);
-        shaderGroup.add(brightPlus);
-
         shaderGroup.add(timeText);
 
         tabMenu.addGroup(shaderGroup);
@@ -290,13 +229,13 @@ class PlayState extends FlxState
             y: startY - 20
         }, 0.15, {
             ease: FlxEase.quadOut,
-            onComplete: function()
+            onComplete: function(_)
             {
                 FlxTween.tween(window, {
                     y: startY + 400
                 }, 0.4, {
                     ease: FlxEase.quadIn,
-                    onComplete: function()
+                    onComplete: function(_)
                     {
                         #if sys
                         Sys.exit(0);
