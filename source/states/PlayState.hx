@@ -8,6 +8,9 @@ import flixel.ui.FlxButton;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 
+import flixel.addons.ui.FlxUITabMenu;
+import flixel.addons.ui.FlxUIGroup;
+
 import openfl.net.FileReference;
 import openfl.events.Event;
 import openfl.events.UncaughtErrorEvent;
@@ -21,9 +24,6 @@ import lime.ui.Window;
 
 import shader.Shaders;
 import states.ReConfigState;
-
-import flixel.addons.ui.FlxUITabMenu;
-import flixel.addons.ui.FlxUIGroup;
 
 #if sys
 import sys.io.File;
@@ -55,10 +55,12 @@ class PlayState extends FlxState
     var defaultImage:String = "assets/images/bg/cheeseburger.png";
     var currentVersion:String = "0.1.0";
 
+    // =========================
+    // TAB MENU (EXAMPLE UI)
+    // =========================
     var tabMenu:FlxUITabMenu;
     var mainGroup:FlxUIGroup;
-    var shaderGroup:FlxUIGroup;
-    var systemGroup:FlxUIGroup;
+    var settingsGroup:FlxUIGroup;
 
     override public function create():Void
     {
@@ -67,14 +69,17 @@ class PlayState extends FlxState
         initCrashHandler();
         loadSettings();
 
-        // =====================
+        // =========================
         // BACKGROUND
-        // =====================
+        // =========================
         bg = new FlxSprite();
         bg.loadGraphic(defaultImage);
         fitImageToScreen();
         add(bg);
 
+        // =========================
+        // SHADER
+        // =========================
         shader = new WiggleEffect();
         shader.uTime.value = [0.0];
         shader.uSpeed.value = [speed];
@@ -83,30 +88,33 @@ class PlayState extends FlxState
 
         bg.shader = shader;
 
+        // =========================
+        // DARK OVERLAY
+        // =========================
         brightnessOverlay = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF000000);
         brightnessOverlay.scrollFactor.set();
         add(brightnessOverlay);
 
-        // =====================
-        // TAB MENU
-        // =====================
-        tabMenu = new FlxUITabMenu(null, [
+        // =========================
+        // TAB MENU UI
+        // =========================
+        var tabs = [
             {name: "main", label: "Main"},
-            {name: "shader", label: "Shader"},
-            {name: "system", label: "System"}
-        ], true);
+            {name: "settings", label: "Settings"}
+        ];
 
-        tabMenu.resize(380, 320);
-        tabMenu.x = 10;
-        tabMenu.y = 10;
+        tabMenu = new FlxUITabMenu(null, tabs, true);
+        tabMenu.resize(320, 300);
+        tabMenu.x = 20;
+        tabMenu.y = 20;
         add(tabMenu);
 
-        // =====================
+        // =========================
         // MAIN TAB
-        // =====================
+        // =========================
         mainGroup = new FlxUIGroup();
 
-        var loadBtn = new FlxButton(20, 20, "Add Image", function()
+        var addImageBtn = new FlxButton(20, 20, "Load Image", function()
         {
             playClick();
             loadImage();
@@ -118,54 +126,40 @@ class PlayState extends FlxState
             closeGame();
         });
 
-        var configBtn = new FlxButton(20, 100, "Config", function()
-        {
-            playClick();
-            FlxG.switchState(new ReConfigState());
-        });
-
-        var resetBtn = new FlxButton(20, 140, "Reset Values", function()
+        var resetBtn = new FlxButton(20, 100, "Reset Values", function()
         {
             playClick();
             resetDefaults();
         });
 
-        mainGroup.add(loadBtn);
+        mainGroup.add(addImageBtn);
         mainGroup.add(exitBtn);
-        mainGroup.add(configBtn);
         mainGroup.add(resetBtn);
 
         tabMenu.addGroup(mainGroup);
 
-        // =====================
-        // SHADER TAB
-        // =====================
-        shaderGroup = new FlxUIGroup();
+        // =========================
+        // SETTINGS TAB (TEXT INFO)
+        // =========================
+        settingsGroup = new FlxUIGroup();
 
-        ampText = new FlxText(20, 20, 400, "");
-        freqText = new FlxText(20, 60, 400, "");
-        speedText = new FlxText(20, 100, 400, "");
-        timeText = new FlxText(20, 140, 400, "");
+        ampText = new FlxText(20, 20, 300, "");
+        freqText = new FlxText(20, 50, 300, "");
+        speedText = new FlxText(20, 80, 300, "");
+        timeText = new FlxText(20, 110, 300, "");
 
-        shaderGroup.add(ampText);
-        shaderGroup.add(freqText);
-        shaderGroup.add(speedText);
-        shaderGroup.add(timeText);
+        settingsGroup.add(ampText);
+        settingsGroup.add(freqText);
+        settingsGroup.add(speedText);
+        settingsGroup.add(timeText);
 
-        tabMenu.addGroup(shaderGroup);
+        tabMenu.addGroup(settingsGroup);
 
-        // =====================
-        // SYSTEM TAB
-        // =====================
-        systemGroup = new FlxUIGroup();
-
-        versionText = new FlxText(20, 20, 500, "Version: " + currentVersion);
-        var toggleText = new FlxText(20, 60, 500, "Press SPACE to toggle UI");
-
-        systemGroup.add(versionText);
-        systemGroup.add(toggleText);
-
-        tabMenu.addGroup(systemGroup);
+        // =========================
+        // VERSION TEXT
+        // =========================
+        versionText = new FlxText(20, FlxG.height - 40, 400, "Version: " + currentVersion);
+        add(versionText);
 
         updateShaderValues();
         updateBrightness();
@@ -176,7 +170,10 @@ class PlayState extends FlxState
         super.update(elapsed);
 
         shader.uTime.value[0] += elapsed;
-        timeText.text = "Time: " + Std.string(Std.int(shader.uTime.value[0] * 100) / 100);
+
+        timeText.text = "Time: " + Std.string(
+            Std.int(shader.uTime.value[0] * 100) / 100
+        );
 
         if (FlxG.keys.justPressed.SPACE)
         {
@@ -186,6 +183,9 @@ class PlayState extends FlxState
         }
     }
 
+    // =========================
+    // SHADER UPDATES
+    // =========================
     function updateShaderValues():Void
     {
         shader.uWaveAmplitude.value = [waveAmplitude];
@@ -218,11 +218,13 @@ class PlayState extends FlxState
         FlxG.sound.play("assets/sounds/click.ogg");
     }
 
+    // =========================
+    // EXIT ANIMATION FIXED
+    // =========================
     function closeGame():Void
     {
         #if desktop
         var window:Window = Application.current.window;
-
         var startY:Float = window.y;
 
         FlxTween.tween(window, {
@@ -249,10 +251,11 @@ class PlayState extends FlxState
         #end
     }
 
+    // =========================
+    // IMAGE FIT
+    // =========================
     function fitImageToScreen():Void
     {
-        if (bg == null || bg.graphic == null) return;
-
         var scaleX = FlxG.width / bg.width;
         var scaleY = FlxG.height / bg.height;
         var finalScale = Math.max(scaleX, scaleY);
@@ -262,6 +265,9 @@ class PlayState extends FlxState
         bg.screenCenter();
     }
 
+    // =========================
+    // IMAGE LOADER
+    // =========================
     function loadImage():Void
     {
         fileRef = new FileReference();
@@ -290,6 +296,9 @@ class PlayState extends FlxState
         loader.loadBytes(fileRef.data);
     }
 
+    // =========================
+    // SETTINGS LOAD
+    // =========================
     function loadSettings():Void
     {
         if (FlxG.save.data.waveAmplitude != null)
@@ -302,13 +311,16 @@ class PlayState extends FlxState
             speed = FlxG.save.data.speed;
     }
 
+    // =========================
+    // CRASH HANDLER
+    // =========================
     function initCrashHandler():Void
     {
         Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(
             UncaughtErrorEvent.UNCAUGHT_ERROR,
             function(e:UncaughtErrorEvent):Void
             {
-                var errorMsg:String = e.error != null ? Std.string(e.error) : "Unknown Crash";
+                var errorMsg:String = Std.string(e.error);
 
                 #if sys
                 try
@@ -317,14 +329,14 @@ class PlayState extends FlxState
                         FileSystem.createDirectory("crash");
 
                     File.saveContent(
-                        "crash/playstate_crash_" + Date.now().getTime() + ".txt",
-                        "Error: " + errorMsg
+                        "crash/error_" + Date.now().getTime() + ".txt",
+                        errorMsg
                     );
                 }
-                catch (saveError:Dynamic) {}
+                catch (e:Dynamic) {}
                 #end
 
-                FlxG.log.error("CRASH DETECTED: " + errorMsg);
+                FlxG.log.error(errorMsg);
             }
         );
     }
