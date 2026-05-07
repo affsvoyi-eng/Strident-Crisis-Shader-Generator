@@ -203,29 +203,7 @@ updateBrightness();
 
 function initCrashHandler():Void
 {
-Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(
-UncaughtErrorEvent.UNCAUGHT_ERROR,
-function(e:UncaughtErrorEvent):Void
-{
-var errorMsg:String = e.error != null ? Std.string(e.error) : "Unknown Crash";
 
-#if sys    
-        try    
-        {    
-            if (!FileSystem.exists("crash"))    
-                FileSystem.createDirectory("crash");    
-
-            File.saveContent(    
-                "crash/playstate_crash_" + Date.now().getTime() + ".txt",    
-                "Error: " + errorMsg    
-            );    
-        }    
-        catch (saveError:Dynamic) {}    
-        #end    
-
-        FlxG.log.error("CRASH DETECTED: " + errorMsg);    
-    }    
-);
 
 }
 
