@@ -22,9 +22,11 @@ import lime.ui.Window;
 import shader.Shaders;
 import states.ReConfigState;
 
+/*
 #if mobile
 import lime.ui.FileDialog;
 #end
+*/
 
 #if sys
 import sys.io.File;
@@ -317,37 +319,14 @@ bg.screenCenter();
 }
 
 function loadImage():Void
-    {                          
-    
-    #if mobile
-
-    var dialog = new FileDialog();
-    dialog.onSelect.add(function(path:String)
-    {
-        var bytes = sys.io.File.getBytes(path);
-        var bmp = openfl.display.BitmapData.fromBytes(bytes);
-
-        bg.loadGraphic(bmp);
-        fitImageToScreen();
-        bg.shader = shader;
-    });
-
-    dialog.openFile("Select Image", null, [
-        "png", "jpg", "jpeg"
-    ]);
-
-    #else
-
+{
     fileRef = new FileReference();
     fileRef.addEventListener(Event.SELECT, onFileSelected);
 
     fileRef.browse([
         new FileFilter("Images", "*.png;*.jpg;*.jpeg")
     ]);
-
-    #end
-    
-    }
+}
 
 function onFileSelected(e:Event):Void
 {
