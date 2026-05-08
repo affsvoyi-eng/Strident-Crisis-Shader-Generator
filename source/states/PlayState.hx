@@ -56,7 +56,7 @@ var uiVisible:Bool = true;
 var uiElements:Array<Dynamic> = [];
 
 var defaultImage:String = "assets/images/bg/cheeseburger.png";
-var currentVersion:String = "0.1.1 nightly";
+public var currentVersion:String = "0.1.1 nightly";
 
 override public function create():Void
 {
@@ -102,6 +102,14 @@ var exitBtn = new FlxButton(FlxG.width - 100, 20, "Exit", function()
 });    
 add(exitBtn);    
 uiElements.push(exitBtn);    
+
+var gliBtn = new FlxButton(FlxG.width - 100, 95, "GlitchEffect", function()    
+{    
+    playClick();    
+    FlxG.switchState(new GlitchEffectState());  
+});    
+add(gliBtn);    
+uiElements.push(gliBtn);    
 
 var reconfigBtn = new FlxButton(FlxG.width - 100, 95, "Config", function()    
 {    
