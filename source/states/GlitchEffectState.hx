@@ -10,23 +10,14 @@ import flixel.tweens.FlxEase;
 
 import openfl.net.FileReference;
 import openfl.events.Event;
-import openfl.events.UncaughtErrorEvent;
 import openfl.net.FileFilter;
-import openfl.display.Loader;
 import openfl.display.Bitmap;
-import openfl.Lib;
 
 import lime.app.Application;
 import lime.ui.Window;
 
 import shader.Shaders;
-import states.ReConfigState;
 import states.PlayState;
-/*
-#if mobile
-import lime.ui.FileDialog;
-#end
-*/
 
 #if sys
 import sys.io.File;
@@ -35,321 +26,197 @@ import sys.FileSystem;
 
 class GlitchEffectState extends FlxState
 {
-var bg:FlxSprite;
-var shader:GlitchEffect;
-var fileRef:FileReference;
-
-var ampText:FlxText;
-var freqText:FlxText;
-var speedText:FlxText;
-var timeText:FlxText;
-var versionText:FlxText;
-
-var waveAmplitude:Float = 0.1;
-var frequency:Float = 5.0;
-var speed:Float = 2.0;
-var brightness:Float = 1.0;
-
-var brightnessOverlay:FlxSprite;
-
-var uiVisible:Bool = true;
-var uiElements:Array<Dynamic> = [];
-
-var defaultImage:String = "assets/images/bg/cheeseburger";
-
-override public function create():Void
-{
-super.create();
-
-initCrashHandler();    
-loadSettings();    
-
-bg = new FlxSprite();    
-bg.loadGraphic(defaultImage);    
-fitImageToScreen();    
-add(bg);    
-
-shader = new GlitchEffect();  
-shader.uTime.value = [0.0];    
-shader.uSpeed.value = [speed];    
-shader.uFrequency.value = [frequency];    
-shader.uWaveAmplitude.value = [waveAmplitude];    
-
-bg.shader = shader;    
-
-brightnessOverlay = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF000000);    
-brightnessOverlay.scrollFactor.set();    
-add(brightnessOverlay);    
-
-versionText = new FlxText(20, FlxG.height - 50, 500, "Version: " + currentVersion);    
-add(versionText);    
-uiElements.push(versionText);    
-
-var loadBtn = new FlxButton(20, 20, "Add Image", function()    
-{    
-    playClick();    
-    loadImage();
-    
-});    
-add(loadBtn);    
-uiElements.push(loadBtn);    
-
-var exitBtn = new FlxButton(FlxG.width - 100, 20, "Back", function()    
-{    
-    playClick();    
-    FlxG.switchState(new PlayState());  
-});    
-add(exitBtn);    
-uiElements.push(exitBtn);    
-  
-
-var resetBtn = new FlxButton(20, FlxG.height - 80, "Reset", function()    
-{    
-    playClick();    
-    resetDefaults();    
-});    
-add(resetBtn);    
-uiElements.push(resetBtn);    
-
-ampText = new FlxText(20, 70, 400, "Wave Amplitude: " + waveAmplitude);    
-add(ampText);    
-uiElements.push(ampText);    
-
-var ampMinus = new FlxButton(20, 95, "-", function()    
-{    
-    waveAmplitude = Math.max(0, waveAmplitude - 0.005);    
-    updateShaderValues();    
-});    
-add(ampMinus);    
-uiElements.push(ampMinus);    
-
-var ampPlus = new FlxButton(120, 95, "+", function()    
-{    
-    waveAmplitude += 0.005;    
-    updateShaderValues();    
-});    
-add(ampPlus);    
-uiElements.push(ampPlus);    
-
-freqText = new FlxText(20, 140, 400, "Frequency: " + frequency);    
-add(freqText);    
-uiElements.push(freqText);    
-
-var freqMinus = new FlxButton(20, 165, "-", function()    
-{    
-    frequency = Math.max(1, frequency - 1);    
-    updateShaderValues();    
-});    
-add(freqMinus);    
-uiElements.push(freqMinus);    
-
-var freqPlus = new FlxButton(120, 165, "+", function()    
-{    
-    frequency += 1;    
-    updateShaderValues();    
-});    
-add(freqPlus);    
-uiElements.push(freqPlus);    
-
-speedText = new FlxText(20, 210, 400, "Speed: " + speed);    
-add(speedText);    
-uiElements.push(speedText);    
-
-var speedMinus = new FlxButton(20, 235, "-", function()    
-{    
-    speed = Math.max(0.1, speed - 0.1);    
-    updateShaderValues();    
-});    
-add(speedMinus);    
-uiElements.push(speedMinus);    
-
-var speedPlus = new FlxButton(120, 235, "+", function()    
-{    
-    speed += 0.1;    
-    updateShaderValues();    
-});    
-add(speedPlus);    
-uiElements.push(speedPlus);    
-
-var brightMinus = new FlxButton(20, 300, "-", function()    
-{    
-    brightness = Math.max(0, brightness - 0.1);    
-    updateBrightness();    
-});    
-add(brightMinus);    
-uiElements.push(brightMinus);    
-
-var brightPlus = new FlxButton(120, 300, "+", function()    
-{    
-    brightness = Math.min(1, brightness + 0.1);    
-    updateBrightness();    
-});    
-add(brightPlus);    
-uiElements.push(brightPlus);    
-
-timeText = new FlxText(20, 330, 400, "Time: 0");    
-add(timeText);    
-uiElements.push(timeText);    
-
-var toggleText = new FlxText(20, FlxG.height - 30, 500, "Press SPACE to toggle UI");    
-add(toggleText);    
-uiElements.push(toggleText);    
-
-updateBrightness();
-
-}
-
-function initCrashHandler():Void
-{
-
-
-}
-
-override public function update(elapsed:Float):Void
-{
-super.update(elapsed);
-
-shader.uTime.value[0] += elapsed;    
-timeText.text = "Time: " + Std.string(Std.int(shader.uTime.value[0] * 100) / 100);    
-
-if (FlxG.keys.justPressed.SPACE)    
-{    
-    uiVisible = !uiVisible;    
-
-    for (e in uiElements)    
-    {    
-        e.visible = uiVisible;    
-        e.active = uiVisible;    
-    }    
-}
-
-}
-
-function resetDefaults():Void
-{
-waveAmplitude = 0.1;
-frequency = 5.0;
-speed = 2.0;
-brightness = 1.0;
-
-updateShaderValues();    
-updateBrightness();
-
-}
-
-function updateBrightness():Void
-{
-brightnessOverlay.alpha = 1 - brightness;
-}
-
-function updateShaderValues():Void
-{
-shader.uWaveAmplitude.value = [waveAmplitude];
-shader.uFrequency.value = [frequency];
-shader.uSpeed.value = [speed];
-
-ampText.text = "Wave Amplitude: " + waveAmplitude;    
-freqText.text = "Frequency: " + frequency;    
-speedText.text = "Speed: " + speed;
-
-}
-
-function playClick():Void
-{
-FlxG.sound.play("assets/sounds/click.ogg");
-}
-
-function closeGame():Void
-{
-#if desktop
-var window:Window = Application.current.window;
-
-var startY:Float = window.y;  
-
-  
-FlxTween.tween(window, {    
-    y: startY - 20    
-}, 0.15, {    
-    ease: FlxEase.quadOut,    
-    onComplete: function(_)    
-    {    
-        FlxTween.tween(window, {    
-            y: startY + 400    
-        }, 0.4, {    
-            ease: FlxEase.quadIn,    
-            onComplete: function(_)    
-            {    
-                #if sys    
-                Sys.exit(0);    
-                #else    
-                Lib.close();    
-                #end    
-            }    
-        });    
-    }    
-});    
-#end
-
-}
-
-function fitImageToScreen():Void
-{
-if (bg == null || bg.graphic == null) return;
-
-bg.scale.set(1, 1);    
-bg.updateHitbox();    
-
-var scaleX = FlxG.width / bg.width;    
-var scaleY = FlxG.height / bg.height;    
-var finalScale = Math.max(scaleX, scaleY);    
-
-bg.scale.set(finalScale, finalScale);    
-bg.updateHitbox();    
-bg.screenCenter();
-
-}
-
-function loadImage():Void
-{
-    fileRef = new FileReference();
-    fileRef.addEventListener(Event.SELECT, onFileSelected);
-
-    fileRef.browse([
-        new FileFilter("Images", "*.png;*.jpg;*.jpeg")
-    ]);
-}
-
-function onFileSelected(e:Event):Void
-{
-fileRef.addEventListener(Event.COMPLETE, onFileLoaded);
-fileRef.load();
-}
-    
-function loadSettings():Void
-{
-if (FlxG.save.data.waveAmplitude != null)
-waveAmplitude = FlxG.save.data.waveAmplitude;
-
-if (FlxG.save.data.frequency != null)  
-    frequency = FlxG.save.data.frequency;  
-
-if (FlxG.save.data.speed != null)  
-    speed = FlxG.save.data.speed;  
-}
-
-function onFileLoaded(e:Event):Void
-{
-var loader = new Loader();
-
-loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(_)    
-{    
-    var bmp:Bitmap = cast loader.content;    
-    bg.loadGraphic(bmp.bitmapData);    
-    fitImageToScreen();    
-    bg.shader = shader;    
-});    
-
-loader.loadBytes(fileRef.data);
-
-}
+    var bg:FlxSprite;
+    var shader:GlitchEffect;
+
+    var fileRef:FileReference;
+
+    var ampText:FlxText;
+    var freqText:FlxText;
+    var speedText:FlxText;
+    var timeText:FlxText;
+    var versionText:FlxText;
+
+    var waveAmplitude:Float = 0.1;
+    var frequency:Float = 5.0;
+    var speed:Float = 2.0;
+    var brightness:Float = 1.0;
+
+    var brightnessOverlay:FlxSprite;
+
+    var uiVisible:Bool = true;
+    var uiElements:Array<Dynamic> = [];
+
+    var defaultImage:String = "assets/images/bg/cheeseburger";
+
+    var currentVersion:String = "0.1.1 nightly";
+
+    override public function create():Void
+    {
+        super.create();
+
+        bg = new FlxSprite();
+        bg.loadGraphic(defaultImage);
+        fitImageToScreen();
+        add(bg);
+
+        shader = new GlitchEffect();
+        shader.uTime.value = [0.0];
+        shader.uSpeed.value = [speed];
+        shader.uFrequency.value = [frequency];
+        shader.uWaveAmplitude.value = [waveAmplitude];
+        bg.shader = shader;
+
+        brightnessOverlay = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF000000);
+        brightnessOverlay.scrollFactor.set();
+        add(brightnessOverlay);
+
+        versionText = new FlxText(20, FlxG.height - 50, 500, "Version: " + currentVersion);
+        add(versionText);
+        uiElements.push(versionText);
+
+        var loadBtn = new FlxButton(20, 20, "Add Image", function()
+        {
+            playClick();
+            loadImage();
+        });
+        add(loadBtn);
+        uiElements.push(loadBtn);
+
+        var exitBtn = new FlxButton(FlxG.width - 100, 20, "Back", function()
+        {
+            playClick();
+            FlxG.switchState(new PlayState());
+        });
+        add(exitBtn);
+        uiElements.push(exitBtn);
+
+        var resetBtn = new FlxButton(20, FlxG.height - 80, "Reset", function()
+        {
+            playClick();
+            resetDefaults();
+        });
+        add(resetBtn);
+        uiElements.push(resetBtn);
+
+        ampText = new FlxText(20, 70, 400, "");
+        add(ampText);
+        uiElements.push(ampText);
+
+        freqText = new FlxText(20, 140, 400, "");
+        add(freqText);
+        uiElements.push(freqText);
+
+        speedText = new FlxText(20, 210, 400, "");
+        add(speedText);
+        uiElements.push(speedText);
+
+        timeText = new FlxText(20, 330, 400, "Time: 0");
+        add(timeText);
+        uiElements.push(timeText);
+
+        var toggleText = new FlxText(20, FlxG.height - 30, 500, "Press SPACE to toggle UI");
+        add(toggleText);
+        uiElements.push(toggleText);
+
+        updateShaderValues();
+        updateBrightness();
+    }
+
+    override public function update(elapsed:Float):Void
+    {
+        super.update(elapsed);
+
+        shader.uTime.value[0] += elapsed;
+        timeText.text = "Time: " + Std.string(Std.int(shader.uTime.value[0] * 100) / 100);
+
+        if (FlxG.keys.justPressed.SPACE)
+        {
+            uiVisible = !uiVisible;
+
+            for (e in uiElements)
+            {
+                e.visible = uiVisible;
+                e.active = uiVisible;
+            }
+        }
+    }
+
+    function loadImage():Void
+    {
+        fileRef = new FileReference();
+
+        fileRef.addEventListener(Event.SELECT, onFileSelected);
+        fileRef.browse([new FileFilter("Images", "*.png;*.jpg;*.jpeg")]);
+    }
+
+    function onFileSelected(e:Event):Void
+    {
+        fileRef.removeEventListener(Event.SELECT, onFileSelected);
+        fileRef.addEventListener(Event.COMPLETE, onFileLoaded);
+
+        fileRef.load();
+    }
+
+    function onFileLoaded(e:Event):Void
+    {
+        fileRef.removeEventListener(Event.COMPLETE, onFileLoaded);
+
+        var bytes = fileRef.data;
+
+        var bmpData = openfl.display.BitmapData.fromBytes(bytes);
+        bg.loadGraphic(bmpData);
+
+        fitImageToScreen();
+        bg.shader = shader;
+    }
+
+    function resetDefaults():Void
+    {
+        waveAmplitude = 0.1;
+        frequency = 5.0;
+        speed = 2.0;
+        brightness = 1.0;
+
+        updateShaderValues();
+        updateBrightness();
+    }
+
+    function updateBrightness():Void
+    {
+        brightnessOverlay.alpha = 1 - brightness;
+    }
+
+    function updateShaderValues():Void
+    {
+        shader.uWaveAmplitude.value = [waveAmplitude];
+        shader.uFrequency.value = [frequency];
+        shader.uSpeed.value = [speed];
+
+        ampText.text = "Wave Amplitude: " + waveAmplitude;
+        freqText.text = "Frequency: " + frequency;
+        speedText.text = "Speed: " + speed;
+    }
+
+    function playClick():Void
+    {
+        FlxG.sound.play("assets/sounds/click.ogg");
+    }
+
+    function fitImageToScreen():Void
+    {
+        if (bg == null) return;
+
+        bg.scale.set(1, 1);
+        bg.updateHitbox();
+
+        var scaleX = FlxG.width / bg.width;
+        var scaleY = FlxG.height / bg.height;
+
+        var finalScale = Math.max(scaleX, scaleY);
+
+        bg.scale.set(finalScale, finalScale);
+        bg.updateHitbox();
+        bg.screenCenter();
+    }
 }
