@@ -52,77 +52,152 @@ class GlitchEffectState extends FlxState
     var currentVersion:String = "0.1.1 nightly";
 
     override public function create():Void
+{
+    super.create();
+
+    bg = new FlxSprite();
+    bg.loadGraphic(defaultImage);
+    fitImageToScreen();
+    add(bg);
+
+    shader = new GlitchEffect();
+    shader.uTime.value = [0.0];
+    shader.uSpeed.value = [speed];
+    shader.uFrequency.value = [frequency];
+    shader.uWaveAmplitude.value = [waveAmplitude];
+    bg.shader = shader;
+
+    brightnessOverlay = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF000000);
+    brightnessOverlay.scrollFactor.set();
+    add(brightnessOverlay);
+
+    versionText = new FlxText(20, FlxG.height - 50, 500, "Version: " + currentVersion);
+    add(versionText);
+    uiElements.push(versionText);
+
+    // ===================== BUTTONS =====================
+
+    var loadBtn = new FlxButton(20, 20, "Add Image", function()
     {
-        super.create();
+        playClick();
+        loadImage();
+    });
+    add(loadBtn);
+    uiElements.push(loadBtn);
 
-        bg = new FlxSprite();
-        bg.loadGraphic(defaultImage);
-        fitImageToScreen();
-        add(bg);
+    var exitBtn = new FlxButton(FlxG.width - 100, 20, "Back", function()
+    {
+        playClick();
+        FlxG.switchState(new PlayState());
+    });
+    add(exitBtn);
+    uiElements.push(exitBtn);
 
-        shader = new GlitchEffect();
-        shader.uTime.value = [0.0];
-        shader.uSpeed.value = [speed];
-        shader.uFrequency.value = [frequency];
-        shader.uWaveAmplitude.value = [waveAmplitude];
-        bg.shader = shader;
+    var resetBtn = new FlxButton(20, FlxG.height - 80, "Reset", function()
+    {
+        playClick();
+        resetDefaults();
+    });
+    add(resetBtn);
+    uiElements.push(resetBtn);
 
-        brightnessOverlay = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF000000);
-        brightnessOverlay.scrollFactor.set();
-        add(brightnessOverlay);
+    // ===================== AMPLITUDE =====================
 
-        versionText = new FlxText(20, FlxG.height - 50, 500, "Version: " + currentVersion);
-        add(versionText);
-        uiElements.push(versionText);
+    ampText = new FlxText(20, 70, 400, "");
+    add(ampText);
+    uiElements.push(ampText);
 
-        var loadBtn = new FlxButton(20, 20, "Add Image", function()
-        {
-            playClick();
-            loadImage();
-        });
-        add(loadBtn);
-        uiElements.push(loadBtn);
-
-        var exitBtn = new FlxButton(FlxG.width - 100, 20, "Back", function()
-        {
-            playClick();
-            FlxG.switchState(new PlayState());
-        });
-        add(exitBtn);
-        uiElements.push(exitBtn);
-
-        var resetBtn = new FlxButton(20, FlxG.height - 80, "Reset", function()
-        {
-            playClick();
-            resetDefaults();
-        });
-        add(resetBtn);
-        uiElements.push(resetBtn);
-
-        ampText = new FlxText(20, 70, 400, "");
-        add(ampText);
-        uiElements.push(ampText);
-
-        freqText = new FlxText(20, 140, 400, "");
-        add(freqText);
-        uiElements.push(freqText);
-
-        speedText = new FlxText(20, 210, 400, "");
-        add(speedText);
-        uiElements.push(speedText);
-
-        timeText = new FlxText(20, 330, 400, "Time: 0");
-        add(timeText);
-        uiElements.push(timeText);
-
-        var toggleText = new FlxText(20, FlxG.height - 30, 500, "Press SPACE to toggle UI");
-        add(toggleText);
-        uiElements.push(toggleText);
-
+    var ampMinus = new FlxButton(20, 95, "-", function()
+    {
+        waveAmplitude = Math.max(0, waveAmplitude - 0.005);
         updateShaderValues();
-        updateBrightness();
-    }
+    });
+    add(ampMinus);
+    uiElements.push(ampMinus);
 
+    var ampPlus = new FlxButton(120, 95, "+", function()
+    {
+        waveAmplitude += 0.005;
+        updateShaderValues();
+    });
+    add(ampPlus);
+    uiElements.push(ampPlus);
+
+    // ===================== FREQUENCY =====================
+
+    freqText = new FlxText(20, 140, 400, "");
+    add(freqText);
+    uiElements.push(freqText);
+
+    var freqMinus = new FlxButton(20, 165, "-", function()
+    {
+        frequency = Math.max(1, frequency - 1);
+        updateShaderValues();
+    });
+    add(freqMinus);
+    uiElements.push(freqMinus);
+
+    var freqPlus = new FlxButton(120, 165, "+", function()
+    {
+        frequency += 1;
+        updateShaderValues();
+    });
+    add(freqPlus);
+    uiElements.push(freqPlus);
+
+    // ===================== SPEED =====================
+
+    speedText = new FlxText(20, 210, 400, "");
+    add(speedText);
+    uiElements.push(speedText);
+
+    var speedMinus = new FlxButton(20, 235, "-", function()
+    {
+        speed = Math.max(0.1, speed - 0.1);
+        updateShaderValues();
+    });
+    add(speedMinus);
+    uiElements.push(speedMinus);
+
+    var speedPlus = new FlxButton(120, 235, "+", function()
+    {
+        speed += 0.1;
+        updateShaderValues();
+    });
+    add(speedPlus);
+    uiElements.push(speedPlus);
+
+    // ===================== BRIGHTNESS =====================
+
+    var brightMinus = new FlxButton(20, 300, "-", function()
+    {
+        brightness = Math.max(0, brightness - 0.1);
+        updateBrightness();
+    });
+    add(brightMinus);
+    uiElements.push(brightMinus);
+
+    var brightPlus = new FlxButton(120, 300, "+", function()
+    {
+        brightness = Math.min(1, brightness + 0.1);
+        updateBrightness();
+    });
+    add(brightPlus);
+    uiElements.push(brightPlus);
+
+    // ===================== TIME =====================
+
+    timeText = new FlxText(20, 330, 400, "Time: 0");
+    add(timeText);
+    uiElements.push(timeText);
+
+    var toggleText = new FlxText(20, FlxG.height - 30, 500, "Press SPACE to toggle UI");
+    add(toggleText);
+    uiElements.push(toggleText);
+
+    updateShaderValues();
+    updateBrightness();
+}
     override public function update(elapsed:Float):Void
     {
         super.update(elapsed);
