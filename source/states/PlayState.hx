@@ -60,162 +60,152 @@ public var currentVersion:String = "0.1.1 nightly";
 
 override public function create():Void
 {
-super.create();
+    super.create();
 
-initCrashHandler();    
-loadSettings();    
+    bg = new FlxSprite();
+    bg.loadGraphic(defaultImage);
+    fitImageToScreen();
+    add(bg);
 
-bg = new FlxSprite();    
-bg.loadGraphic(defaultImage);    
-fitImageToScreen();    
-add(bg);    
+    shader = new GlitchEffect();
+    shader.uTime.value = [0.0];
+    shader.uSpeed.value = [speed];
+    shader.uFrequency.value = [frequency];
+    shader.uWaveAmplitude.value = [waveAmplitude];
+    bg.shader = shader;
 
-shader = new WiggleEffect();  
-shader.uTime.value = [0.0];    
-shader.uSpeed.value = [speed];    
-shader.uFrequency.value = [frequency];    
-shader.uWaveAmplitude.value = [waveAmplitude];    
+    brightnessOverlay = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF000000);
+    brightnessOverlay.scrollFactor.set();
+    add(brightnessOverlay);
 
-bg.shader = shader;    
+    versionText = new FlxText(20, FlxG.height - 50, 500, "Version: " + currentVersion);
+    add(versionText);
+    uiElements.push(versionText);
 
-brightnessOverlay = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF000000);    
-brightnessOverlay.scrollFactor.set();    
-add(brightnessOverlay);    
+    // ===================== BUTTONS =====================
 
-versionText = new FlxText(20, FlxG.height - 50, 500, "Version: " + currentVersion);    
-add(versionText);    
-uiElements.push(versionText);    
+    var loadBtn = new FlxButton(20, 20, "Add Image", function()
+    {
+        playClick();
+        loadImage();
+    });
+    add(loadBtn);
+    uiElements.push(loadBtn);
 
-var loadBtn = new FlxButton(20, 20, "Add Image", function()    
-{    
-    playClick();    
-    loadImage();
-    
-});    
-add(loadBtn);    
-uiElements.push(loadBtn);    
+    var exitBtn = new FlxButton(FlxG.width - 100, 20, "Back", function()
+    {
+        playClick();
+        FlxG.switchState(new PlayState());
+    });
+    add(exitBtn);
+    uiElements.push(exitBtn);
 
-var exitBtn = new FlxButton(FlxG.width - 100, 20, "Exit", function()    
-{    
-    playClick();    
-    closeGame();    
-});    
-add(exitBtn);    
-uiElements.push(exitBtn);    
+    var resetBtn = new FlxButton(20, FlxG.height - 80, "Reset", function()
+    {
+        playClick();
+        resetDefaults();
+    });
+    add(resetBtn);
+    uiElements.push(resetBtn);
 
-var gliBtn = new FlxButton(FlxG.width - 100, 150, "GlitchEffect", function()    
-{    
-    playClick();    
-    FlxG.switchState(new GlitchEffectState());  
-});    
-add(gliBtn);    
-uiElements.push(gliBtn);    
+    // ===================== AMPLITUDE =====================
 
-var reconfigBtn = new FlxButton(FlxG.width - 100, 95, "Config", function()    
-{    
-    playClick();    
-    FlxG.switchState(new ReConfigState());  
-});    
-add(reconfigBtn);    
-uiElements.push(reconfigBtn);    
-  
+    ampText = new FlxText(20, 70, 400, "");
+    add(ampText);
+    uiElements.push(ampText);
 
-var resetBtn = new FlxButton(20, FlxG.height - 80, "Reset", function()    
-{    
-    playClick();    
-    resetDefaults();    
-});    
-add(resetBtn);    
-uiElements.push(resetBtn);    
+    var ampMinus = new FlxButton(20, 95, "-", function()
+    {
+        waveAmplitude = Math.max(0, waveAmplitude - 0.005);
+        updateShaderValues();
+    });
+    add(ampMinus);
+    uiElements.push(ampMinus);
 
-ampText = new FlxText(20, 70, 400, "Wave Amplitude: " + waveAmplitude);    
-add(ampText);    
-uiElements.push(ampText);    
+    var ampPlus = new FlxButton(120, 95, "+", function()
+    {
+        waveAmplitude += 0.005;
+        updateShaderValues();
+    });
+    add(ampPlus);
+    uiElements.push(ampPlus);
 
-var ampMinus = new FlxButton(20, 95, "-", function()    
-{    
-    waveAmplitude = Math.max(0, waveAmplitude - 0.005);    
-    updateShaderValues();    
-});    
-add(ampMinus);    
-uiElements.push(ampMinus);    
+    // ===================== FREQUENCY =====================
 
-var ampPlus = new FlxButton(120, 95, "+", function()    
-{    
-    waveAmplitude += 0.005;    
-    updateShaderValues();    
-});    
-add(ampPlus);    
-uiElements.push(ampPlus);    
+    freqText = new FlxText(20, 140, 400, "");
+    add(freqText);
+    uiElements.push(freqText);
 
-freqText = new FlxText(20, 140, 400, "Frequency: " + frequency);    
-add(freqText);    
-uiElements.push(freqText);    
+    var freqMinus = new FlxButton(20, 165, "-", function()
+    {
+        frequency = Math.max(1, frequency - 1);
+        updateShaderValues();
+    });
+    add(freqMinus);
+    uiElements.push(freqMinus);
 
-var freqMinus = new FlxButton(20, 165, "-", function()    
-{    
-    frequency = Math.max(1, frequency - 1);    
-    updateShaderValues();    
-});    
-add(freqMinus);    
-uiElements.push(freqMinus);    
+    var freqPlus = new FlxButton(120, 165, "+", function()
+    {
+        frequency += 1;
+        updateShaderValues();
+    });
+    add(freqPlus);
+    uiElements.push(freqPlus);
 
-var freqPlus = new FlxButton(120, 165, "+", function()    
-{    
-    frequency += 1;    
-    updateShaderValues();    
-});    
-add(freqPlus);    
-uiElements.push(freqPlus);    
+    // ===================== SPEED =====================
 
-speedText = new FlxText(20, 210, 400, "Speed: " + speed);    
-add(speedText);    
-uiElements.push(speedText);    
+    speedText = new FlxText(20, 210, 400, "");
+    add(speedText);
+    uiElements.push(speedText);
 
-var speedMinus = new FlxButton(20, 235, "-", function()    
-{    
-    speed = Math.max(0.1, speed - 0.1);    
-    updateShaderValues();    
-});    
-add(speedMinus);    
-uiElements.push(speedMinus);    
+    var speedMinus = new FlxButton(20, 235, "-", function()
+    {
+        speed = Math.max(0.1, speed - 0.1);
+        updateShaderValues();
+    });
+    add(speedMinus);
+    uiElements.push(speedMinus);
 
-var speedPlus = new FlxButton(120, 235, "+", function()    
-{    
-    speed += 0.1;    
-    updateShaderValues();    
-});    
-add(speedPlus);    
-uiElements.push(speedPlus);    
+    var speedPlus = new FlxButton(120, 235, "+", function()
+    {
+        speed += 0.1;
+        updateShaderValues();
+    });
+    add(speedPlus);
+    uiElements.push(speedPlus);
 
-var brightMinus = new FlxButton(20, 300, "-", function()    
-{    
-    brightness = Math.max(0, brightness - 0.1);    
-    updateBrightness();    
-});    
-add(brightMinus);    
-uiElements.push(brightMinus);    
+    // ===================== BRIGHTNESS =====================
 
-var brightPlus = new FlxButton(120, 300, "+", function()    
-{    
-    brightness = Math.min(1, brightness + 0.1);    
-    updateBrightness();    
-});    
-add(brightPlus);    
-uiElements.push(brightPlus);    
+    var brightMinus = new FlxButton(20, 300, "-", function()
+    {
+        brightness = Math.max(0, brightness - 0.1);
+        updateBrightness();
+    });
+    add(brightMinus);
+    uiElements.push(brightMinus);
 
-timeText = new FlxText(20, 330, 400, "Time: 0");    
-add(timeText);    
-uiElements.push(timeText);    
+    var brightPlus = new FlxButton(120, 300, "+", function()
+    {
+        brightness = Math.min(1, brightness + 0.1);
+        updateBrightness();
+    });
+    add(brightPlus);
+    uiElements.push(brightPlus);
 
-var toggleText = new FlxText(20, FlxG.height - 30, 500, "Press SPACE to toggle UI");    
-add(toggleText);    
-uiElements.push(toggleText);    
+    // ===================== TIME =====================
 
-updateBrightness();
+    timeText = new FlxText(20, 330, 400, "Time: 0");
+    add(timeText);
+    uiElements.push(timeText);
 
+    var toggleText = new FlxText(20, FlxG.height - 30, 500, "Press SPACE to toggle UI");
+    add(toggleText);
+    uiElements.push(toggleText);
+
+    updateShaderValues();
+    updateBrightness();
 }
-
+    
 function initCrashHandler():Void
 {
 
