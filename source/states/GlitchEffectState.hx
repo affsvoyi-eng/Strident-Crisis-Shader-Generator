@@ -47,7 +47,7 @@ class GlitchEffectState extends FlxState
     var uiVisible:Bool = true;
     var uiElements:Array<Dynamic> = [];
 
-    var defaultImage:String = "assets/images/bg/cheeseburger";
+    var defaultImage:String = "assets/images/bg/cheeseburger.png";
 
     var currentVersion:String = "0.1.1 nightly";
 
