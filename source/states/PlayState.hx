@@ -23,7 +23,7 @@ import shader.Shaders;
 import states.ReConfigState;
 
 #if mobile
-import lime.system.JNI;
+import lime.ui.FileDialog;
 #end
 
 #if sys
@@ -317,9 +317,9 @@ bg.screenCenter();
 }
 
 function loadImage():Void
-{
+    {                          
+    
     #if mobile
-    import lime.ui.FileDialog;
 
     var dialog = new FileDialog();
     dialog.onSelect.add(function(path:String)
@@ -346,8 +346,9 @@ function loadImage():Void
     ]);
 
     #end
-}
     
+    }
+
 function onFileSelected(e:Event):Void
 {
 fileRef.addEventListener(Event.COMPLETE, onFileLoaded);
