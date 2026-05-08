@@ -103,7 +103,7 @@ var exitBtn = new FlxButton(FlxG.width - 100, 20, "Exit", function()
 add(exitBtn);    
 uiElements.push(exitBtn);    
 
-var gliBtn = new FlxButton(FlxG.width - 100, 95, "GlitchEffect", function()    
+var gliBtn = new FlxButton(FlxG.width - 100, 150, "GlitchEffect", function()    
 {    
     playClick();    
     FlxG.switchState(new GlitchEffectState());  
