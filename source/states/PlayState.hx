@@ -54,7 +54,7 @@ var uiVisible:Bool = true;
 var uiElements:Array<Dynamic> = [];
 
 var defaultImage:String = "assets/images/bg/cheeseburger.png";
-var currentVersion:String = "0.1.0";
+var currentVersion:String = "0.1.1 nightly";
 
 override public function create():Void
 {
